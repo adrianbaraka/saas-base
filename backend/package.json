@@ -1,0 +1,28 @@
+{
+	"name": "myapp",
+	"version": "1.0.50",
+	"scripts": {
+		"test": "bun test",
+		"dev": "bun run --watch src/index.ts",
+		"betterAuth:generate": "bun x auth@latest generate --output src/lib/db/schema",
+		"db:generate": "bunx drizzle-kit generate",
+		"db:migrate": "bunx drizzle-kit migrate",
+		"db:ui": "bun x drizzle-kit studio"
+	},
+	"dependencies": {
+		"@elysia/openapi": "^1.4.15",
+		"better-auth": "^1.6.20",
+		"dotenv": "^17.4.2",
+		"drizzle-orm": "^0.45.2",
+		"drizzle-typebox": "^0.3.3",
+		"elysia": "latest",
+		"pg": "^8.22.0"
+	},
+	"devDependencies": {
+		"@types/pg": "^8.20.0",
+		"bun-types": "latest",
+		"drizzle-kit": "^0.31.10",
+		"tsx": "^4.22.4"
+	},
+	"module": "src/index.js"
+}
