@@ -1,37 +1,50 @@
-import { betterAuth } from "better-auth";
+/* eslint-disable */
+import { betterAuth } from "better-auth/minimal";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { openAPI } from "better-auth/plugins";
+import { admin as adminPlugin, openAPI } from "better-auth/plugins";
 import * as authSchema from "@lib/db/schema/auth-schema";
 import { db } from "@lib/db";
 import Elysia from "elysia";
 import openapi from "@elysia/openapi";
-import { roles } from "./roles";
+import { ac, admin, user } from "./permissions";
 
-const AUTH_BASE_PATH = "/auth/api";
+const AUTH_BASE_PATH = "/api/auth";
 
-// https://better-auth.com/docs/concepts/database#extending-core-schema
-// https://better-auth.com/docs/concepts/typescript#inferring-additional-fields-on-client
 // better auth object
 export const auth = betterAuth({
+	// session: {
+	// 	cookieCache: {
+	// 		enabled: true,
+	// 		maxAge: 2 * 60, // Cache duration in seconds
+	// 	},
+	// },
+	trustedOrigins: [
+		process.env.BETTER_AUTH_URL ?? "",
+		"http://localhost:8000",
+	],
+	advanced: {
+		ipAddress: {
+			ipAddressHeaders: ["x-forwarded-for"],
+		},
+	},
 	database: drizzleAdapter(db, {
 		provider: "pg",
 		schema: authSchema,
 	}),
-	user: {
-		additionalFields: {
-			roles: {
-				type: "string[]",
-				required: true,
-				input: false,
-				defaultValue: [roles.User],
-			},
-		},
-	},
 	emailAndPassword: {
 		enabled: true,
 	},
 	basePath: AUTH_BASE_PATH,
-	plugins: [openAPI()],
+	plugins: [
+		openAPI(),
+		adminPlugin({
+			ac,
+			roles: {
+				admin,
+				user,
+			},
+		}),
+	],
 });
 
 export type User = typeof auth.$Infer.Session.user;
@@ -77,22 +90,17 @@ export const betterAuthRoute = new Elysia({ name: "better-auth" }).mount(
 // openapi docs for better auth
 const betterAuthComponents = await OpenAPI.components;
 
-export const betterAuthDocs = new Elysia({ name: "better-auth-docs" }).use(
+// /openapi docs
+export const Docs = new Elysia({ name: "docs" }).use(
 	openapi({
 		documentation: {
 			components: {
 				...betterAuthComponents,
 				securitySchemes: {
 					...betterAuthComponents?.securitySchemes,
-					CookieAuth: {
-						type: "apiKey",
-						in: "cookie",
-						name: "better-auth.session_token",
-					},
 				},
 			},
 			paths: await OpenAPI.getPaths(),
-			security: [{ CookieAuth: [] }], // Reference cookie globally
 		},
 	}),
 );
@@ -103,7 +111,7 @@ export const authMacro = new Elysia({ name: "auth-macro" }).macro({
 		async resolve({ status, request: { headers } }) {
 			const { auth } = await import("@lib/auth");
 			const session = await auth.api.getSession({ headers });
-			if (!session) return status(401, { error: "Unauthorized" });
+			if (!session) return status(401, { error: "Unauthenticated." });
 
 			return {
 				user: session.user,

@@ -1,0 +1,67 @@
+services:
+  base-db:
+    container_name: base-db
+    image: postgres:18.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      start_period: 10s
+      interval: 1m
+    volumes:
+      - base_db_data:/var/lib/postgresql
+    networks:
+      - internal
+
+  base-backend:
+    image: "UnifyWorks/base-backend"
+    container_name: "base-backend"
+    restart: unless-stopped
+    environment:
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
+      - BETTER_AUTH_URL=${APP_URL}
+      - DATABASE_URL=${DATABASE_URL}
+    depends_on:
+      base-db:
+        condition: service_healthy
+    networks:
+      - internal
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:8000/health || exit 1",
+        ]
+      timeout: 30s
+      retries: 3
+      start_period: 15s
+
+  base-frontend:
+    image: "UnifyWorks/base-frontend"
+    container_name: "base-frontend"
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PUBLIC_FRONTEND_URL=${APP_URL}
+      - ORIGIN=${APP_URL}
+      - BACKEND_URL=${BACKEND_URL}
+      #- ADDRESS_HEADER=${ADDRESS_HEADER}
+      #- XFF_DEPTH=${XFF_DEPTH}
+    healthcheck:
+      test: ["CMD", "bun", "healthCheck.ts"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 3
+      start_period: 30s
+    networks:
+      - internal
+
+networks:
+  internal:
+
+volumes:
+  base_db_data:

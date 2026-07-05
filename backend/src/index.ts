@@ -1,11 +1,43 @@
-import { Elysia } from "elysia";
-import { users } from "@routes/v1/users/users";
-import { betterAuthDocs, betterAuthRoute } from "@lib/auth";
+import { Elysia, t } from "elysia";
+import { betterAuthRoute, Docs } from "@lib/auth";
+import { template } from "@routes/v1/template/template";
+import { RolesRoutes } from "@routes/v1/roles/roles";
+import { defaultAdmin, runMigrations } from "@lib/utils";
 
-export const app = new Elysia()
-	.use(betterAuthRoute)
-	.use(betterAuthDocs)
-	.group("/v1", (v1) => v1.use(users))
-	.listen(8000);
+const healthCheck = new Elysia().get("/health", () => ({ success: true }), {
+	response: { 200: t.Object({ success: t.Boolean() }) },
+	detail: { security: [] },
+});
 
-console.log(`Elysia is running at ${app.server?.hostname}:${app.server?.port}`);
+async function main() {
+	// if prod dont mount docs and template
+	const isProduction = process.env.NODE_ENV === "production";
+	try {
+		await runMigrations();
+		console.log("Migrations applied successfully");
+		await defaultAdmin();
+	} catch (err) {
+		console.error(err);
+		//process.exit(2);
+	}
+
+	const app = new Elysia()
+		.use(healthCheck)
+		.use(!isProduction ? Docs : (app) => app)
+		.use(betterAuthRoute)
+
+		.group("/api/v1", (v1) => {
+			if (!isProduction) {
+				v1.use(template);
+			}
+			v1.use(RolesRoutes);
+			return v1;
+		})
+		.listen(8000);
+
+	console.log(
+		`Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,
+	);
+}
+
+void main();

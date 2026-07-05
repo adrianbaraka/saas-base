@@ -40,3 +40,20 @@
 
 - The server is running at `http://localhost:3000`
 - Visit [http://localhost:3000/openapi](http://localhost:3000/openapi) for the openAPI docs for testing.
+
+## Frontend
+
+#### Local Development
+The prerequisites needed are Bun and the running backend.
+
+````bash
+# configure env variables to connect to backend
+cp .env.example env
+
+# install deps
+bun install
+
+# run dev server
+bun run dev
+````
+If everything is fine the server should be up at [http://localhost:5173](http://localhost:5173).
