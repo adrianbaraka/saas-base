@@ -1,16 +1,15 @@
 import { error, fail, isRedirect, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { backendFetch } from '$lib/server/backend-fetch';
 import type { BetterAuthUser, Role } from '$lib';
 
 type userRes = {
 	user: BetterAuthUser;
 };
 
-export const load: PageServerLoad = async ({ locals, request, getClientAddress }) => {
+export const load: PageServerLoad = async ({ locals }) => {
 	let res: Response;
 	try {
-		res = await backendFetch('/api/v1/users/roles', request, getClientAddress(), fetch);
+		res = await locals.backendFetch('/api/v1/users/roles');
 	} catch (e) {
 		console.error(e);
 		error(503, 'An Unexpected error occurred.');
@@ -43,7 +42,7 @@ export const load: PageServerLoad = async ({ locals, request, getClientAddress }
 // send an email with a link to set their password and verify their email.
 // uses the endpoint request password reset
 export const actions: Actions = {
-	createUser: async ({ request, locals, fetch, getClientAddress }) => {
+	createUser: async ({ request, locals }) => {
 		const data = await request.formData();
 
 		const fullPayLoad = {
@@ -74,19 +73,13 @@ export const actions: Actions = {
 			return error(403, 'Unauthorised');
 		}
 		try {
-			const res = await backendFetch(
-				'/api/auth/admin/create-user',
-				request,
-				getClientAddress(),
-				fetch,
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify(payLoad)
-				}
-			);
+			const res = await locals.backendFetch('/api/auth/admin/create-user', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(payLoad)
+			});
 
 			if (!res.ok) {
 				let message = 'Failed to create user';
@@ -105,7 +98,6 @@ export const actions: Actions = {
 			}
 			//
 			const created: userRes = await res.json();
-
 
 			redirect(303, `/admin/users/${created.user.id}`);
 		} catch (error) {

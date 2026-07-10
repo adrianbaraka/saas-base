@@ -62,7 +62,7 @@
 	let status = $derived.by(() => {
 		if (errorMessage) return { type: 'error', text: errorMessage };
 		if (newPassword.length > 0 && newPassword.length < 8)
-			return { type: 'error', text: 'New password length must be greater than 8' };
+			return { type: 'error', text: 'New password length must be at least 8 characters long' };
 		if (passwordsMismatch) return { type: 'error', text: "Passwords don't match" };
 		if (newEqOld) return { type: 'error', text: 'New Password cannot be the same as the old one.' };
 		return null;

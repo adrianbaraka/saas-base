@@ -3,6 +3,7 @@ import { error, redirect } from '@sveltejs/kit';
 import { getRequiredRole } from '$lib/roles';
 import { fetchSession } from '$lib/server/session';
 import { env } from '$env/dynamic/private';
+import { createBackendFetch } from '$lib/server/backend-fetch';
 
 async function proxyToBackend(backendUrl: URL, event: RequestEvent) {
 	backendUrl.search = event.url.search;
@@ -23,6 +24,7 @@ async function proxyToBackend(backendUrl: URL, event: RequestEvent) {
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
+	event.locals.backendFetch = createBackendFetch(event);
 	// rewrite /api requests to backend. Avoids cors issues entirely
 	if (event.url.pathname.startsWith('/api')) {
 		return proxyToBackend(new URL(event.url.pathname, env.BACKEND_URL), event);
@@ -36,7 +38,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 	// everything from here should be protected
 
-	event.locals.session = await fetchSession(event.request, event.getClientAddress(), event.fetch);
+	event.locals.session = await fetchSession(event.locals.backendFetch);
 
 	// protected route and user is not authenticated redirect to login
 	if (!event.locals.session) redirect(302, '/login');

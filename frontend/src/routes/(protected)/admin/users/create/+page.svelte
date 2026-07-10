@@ -14,12 +14,12 @@
 </script>
 
 <Appbar title="Create a new user" description="" user={data.me}>
-	<div class="items-center justify-center flex gap-5">
+	<div class="items-center justify-center flex gap-5 flex-col lg:flex-row">
 		<Section title="New User">
 			<form
 				method="POST"
 				action="?/createUser"
-				class="grid grid-cols-1 md:grid-cols-2 gap-4 p-5"
+				class="grid grid-cols-1 md:grid-cols-2 gap-4"
 				use:enhance={({formData}) => {
 					submitting = true;
 					const email = formData.get('email') as string;

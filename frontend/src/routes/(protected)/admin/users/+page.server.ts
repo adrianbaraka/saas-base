@@ -1,7 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import type { BetterAuthUser } from '$lib';
-import { backendFetch } from '$lib/server/backend-fetch';
 
 export interface ListUsersResponse {
 	users: BetterAuthUser[];
@@ -17,7 +16,7 @@ export interface UserStatsResponse {
 	adminUsers: number;
 }
 
-export const load: PageServerLoad = async ({ fetch, request, url, locals, getClientAddress }) => {
+export const load: PageServerLoad = async ({ url, locals }) => {
 	const limit = Number(url.searchParams.get('limit') ?? 20);
 	const offset = Number(url.searchParams.get('offset') ?? 0);
 	const search = url.searchParams.get('search') ?? '';
@@ -37,8 +36,8 @@ export const load: PageServerLoad = async ({ fetch, request, url, locals, getCli
 
 	try {
 		[usersRes, statsRes] = await Promise.all([
-			backendFetch(`/api/auth/admin/list-users?${query}`, request, getClientAddress(), fetch),
-			backendFetch('/api/v1/users/stats', request, getClientAddress(), fetch)
+			locals.backendFetch(`/api/auth/admin/list-users?${query}`),
+			locals.backendFetch('/api/v1/users/stats')
 		]);
 	} catch {
 		error(503, 'Could not reach the server.');

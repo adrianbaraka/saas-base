@@ -1,18 +1,22 @@
 import { env } from '$env/dynamic/private';
+import type { RequestEvent } from '@sveltejs/kit';
 
 /**
- * sets the cookies(session) and the client ip
+ * Creates a per-request backendFetch bound to this request's cookies,
+ * client IP, and fetch implementation. Constructed once per request in
+ * hooks.server.ts and attached to event.locals.
  */
-export function backendFetch(
-	path: string,
-	request: Request,
-	clientAddress: string,
-	fetchFn: typeof fetch,
-	init: RequestInit = {}
-): Promise<Response> {
-	const headers = new Headers(init.headers);
-	headers.set('cookie', request.headers.get('cookie') ?? '');
-	headers.set('x-forwarded-for', clientAddress);
+export function createBackendFetch(event: RequestEvent) {
+	const cookie = event.request.headers.get('cookie') ?? '';
+	const clientAddress = event.getClientAddress();
+	const fetchFn = event.fetch;
 
-	return fetchFn(`${env.BACKEND_URL}${path}`, { ...init, headers });
+	return function backendFetch(path: string, init: RequestInit = {}): Promise<Response> {
+		const headers = new Headers(init.headers);
+		headers.set('cookie', cookie);
+		headers.set('x-forwarded-for', clientAddress);
+
+		return fetchFn(`${env.BACKEND_URL}${path}`, { ...init, headers });
+	};
 }
+export type BackendFetchType = ReturnType<typeof createBackendFetch>;

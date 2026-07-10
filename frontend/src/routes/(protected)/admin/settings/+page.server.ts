@@ -1,12 +1,11 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import type { UserSessionFull } from '$lib';
-import { backendFetch } from '$lib/server/backend-fetch';
 
-export const load: PageServerLoad = async ({ fetch, request, locals, getClientAddress }) => {
+export const load: PageServerLoad = async ({ locals }) => {
 	let res: Response;
 	try {
-		res = await backendFetch('/api/auth/list-sessions', request, getClientAddress(), fetch);
+		res = await locals.backendFetch('/api/auth/list-sessions');
 	} catch (e) {
 		console.error(e);
 		error(503, 'An Unexpected error occurred.');

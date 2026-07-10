@@ -1,6 +1,5 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { backendFetch } from '$lib/server/backend-fetch';
 
 type RolesFullResponse = {
 	modules: {
@@ -13,10 +12,10 @@ type RolesFullResponse = {
 	}[];
 };
 
-export const load: PageServerLoad = async ({ fetch, request, locals, getClientAddress }) => {
+export const load: PageServerLoad = async ({ locals }) => {
 	let res: Response;
 	try {
-		res = await backendFetch('/api/v1/users/roles/full', request, getClientAddress(), fetch);
+		res = await locals.backendFetch('/api/v1/users/roles/full');
 	} catch (e) {
 		console.error(e);
 		error(503, 'An Unexpected error occurred.');

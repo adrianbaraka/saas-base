@@ -10,7 +10,7 @@ export async function welcomeEmailSend({ email, me }: { email: string; me: Bette
 	const isAdmin = me.role?.includes('admin');
 	// TODO who can send a welcome email
 	if (!isAdmin) {
-		showToast('You cannot perfom this action.', 'error');
+		showToast('You cannot perform this action.', 'error');
 		return;
 	}
 	const payload = {

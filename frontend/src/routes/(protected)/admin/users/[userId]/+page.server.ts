@@ -1,26 +1,14 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import type { BetterAuthUser, Role, UserSessionResponseFull } from '$lib';
-import { backendFetch } from '$lib/server/backend-fetch';
 
-export const load: PageServerLoad = async ({
-	fetch,
-	request,
-	params,
-	locals,
-	getClientAddress
-}) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	const payload = {
 		userId: params.userId
 	};
 	const [userRes, sessionsRes, rolesRes] = await Promise.allSettled([
-		backendFetch(
-			`/api/auth/admin/get-user?id=${params.userId}`,
-			request,
-			getClientAddress(),
-			fetch
-		),
-		backendFetch('/api/auth/admin/list-user-sessions', request, getClientAddress(), fetch, {
+		locals.backendFetch(`/api/auth/admin/get-user?id=${params.userId}`),
+		locals.backendFetch('/api/auth/admin/list-user-sessions', {
 			headers: {
 				'Content-Type': 'application/json',
 				Accept: 'application/json'
@@ -28,7 +16,7 @@ export const load: PageServerLoad = async ({
 			method: 'POST',
 			body: JSON.stringify(payload)
 		}),
-		backendFetch('/api/v1/users/roles', request, getClientAddress(), fetch)
+		locals.backendFetch('/api/v1/users/roles')
 	]);
 
 	if (userRes.status === 'rejected') error(503, 'Could not reach the server.');

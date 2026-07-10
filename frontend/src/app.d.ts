@@ -5,10 +5,10 @@ declare global {
 	namespace App {
 		interface Locals {
 			session: BetterAuthSession | null;
+			backendFetch: (path: string, init?: RequestInit) => Promise<Response>;
 		}
 	}
 }
-
 
 export {};
 

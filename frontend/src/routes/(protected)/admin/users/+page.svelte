@@ -226,7 +226,7 @@
 							</tr>
 						{:else}
 							<tr>
-								<td colspan={5} class="text-center py-6">No users found.</td>
+								<td colspan={6} class="text-center py-6">No users found.</td>
 							</tr>
 						{/each}
 					</tbody>
