@@ -35,6 +35,7 @@ COPY --chown=app:app ./drizzle drizzle
 COPY --from=builder --chown=app:app /build/base-backend base-backend
 
 ENV NODE_ENV=production
+# drizzle migrations
 ENV MIGRATIONS_FOLDER=./drizzle
 
 EXPOSE 8000

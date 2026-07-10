@@ -1,7 +1,7 @@
 const routeRoles = new Map<string, string>();
 routeRoles.set('/(protected)/admin', 'admin');
 
-// where to land after login
+// prefix for routes based on role
 const rolePrefixList: Record<string, string> = {
 	admin: '/admin',
 	default: '/user'

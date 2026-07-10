@@ -8,12 +8,11 @@ async function proxyToBackend(backendUrl: URL, event: RequestEvent) {
 	backendUrl.search = event.url.search;
 
 	const backendRequest = new Request(backendUrl.toString(), event.request.clone());
-	
-	// https://svelte.dev/docs/kit/adapter-node#Environment-variables-ADDRESS_HEADER-and-XFF_DEPTH
+
 	backendRequest.headers.set('x-forwarded-for', event.getClientAddress());
 
 	try {
-		return await fetch(backendRequest);
+		return await fetch(backendRequest, { redirect: 'manual' });
 	} catch (err) {
 		console.error(`[proxy] Failed to reach backend at ${backendUrl.toString()}:`, err);
 		return new Response(JSON.stringify({ message: 'An Error Occurred. Try Again Later.' }), {
@@ -25,7 +24,7 @@ async function proxyToBackend(backendUrl: URL, event: RequestEvent) {
 
 export const handle: Handle = async ({ event, resolve }) => {
 	// rewrite /api requests to backend. Avoids cors issues entirely
-	if (event.url.pathname.startsWith('/api/auth')) {
+	if (event.url.pathname.startsWith('/api')) {
 		return proxyToBackend(new URL(event.url.pathname, env.BACKEND_URL), event);
 	}
 
@@ -42,7 +41,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// protected route and user is not authenticated redirect to login
 	if (!event.locals.session) redirect(302, '/login');
 
-	// role level protections just ui the baackend also enforces
+	// role level protections just ui the backend also enforces
 	const requiredRole = getRequiredRole(route);
 
 	// was null or undefined

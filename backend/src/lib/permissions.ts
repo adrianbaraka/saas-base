@@ -1,5 +1,5 @@
 import { createAccessControl } from "better-auth/plugins/access";
-import { adminAc, defaultStatements } from "better-auth/plugins/admin/access";
+import { defaultStatements } from "better-auth/plugins/admin/access";
 import { auth } from "./auth";
 
 // system modules for example the module roles has the permissions list etc...
@@ -15,7 +15,19 @@ export const ac = createAccessControl(statement);
 export const user = ac.newRole({});
 
 export const admin = ac.newRole({
-	...adminAc.statements,
+	user: [
+		"create",
+		"list",
+		"set-role",
+		"ban",
+		// "impersonate",
+		"delete",
+		//"set-password", // no one can set another users password even admins
+		//"set-email",
+		"get",
+		"update",
+	],
+	session: ["list", "revoke", "delete"],
 	roles: ["list"],
 });
 

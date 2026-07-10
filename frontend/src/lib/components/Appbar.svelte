@@ -19,8 +19,8 @@
 	} = $props();
 
 	// TODO settings will have tabs go to right tab here
-	const settingsURL = $derived(rolePrefix(user?.role) + "/settings")
-	const profileURL = $derived(rolePrefix(user?.role) + "/settings")
+	const settingsURL = $derived(rolePrefix(user?.role) + '/settings');
+	const profileURL = $derived(rolePrefix(user?.role) + '/settings');
 
 	async function logout() {
 		await authClient.signOut({
@@ -29,7 +29,7 @@
 					goto('/login');
 				},
 				onError(context) {
-					showToast("An Error Occurred. Try again later.", "error")
+					showToast('An Error Occurred. Try again later.', 'error');
 					console.error(context.error);
 				}
 			}
@@ -66,7 +66,14 @@
 					tabindex="-1"
 					class="menu lg:menu-sm dropdown-content bg-base-300 rounded-box z-1 mt-3 w-52 p-2 shadow"
 				>
-					<li class="text-center">{user?.name}</li>
+					<li class="max-w-full min-w-0 px-3 *:hover:bg-transparent *:hover:cursor-text">
+						<div class="flex justify-center w-full truncate font-medium" title={user?.name}>
+							{user?.name}
+						</div>
+						<div class="flex justify-center w-full truncate" title={user?.email}>
+							{user?.email}
+						</div>
+					</li>
 					<hr class="my-2" />
 					<li>
 						<a class="justify-between" href={profileURL}> My Profile </a>
@@ -84,4 +91,3 @@
 		{@render children()}
 	</div>
 </div>
-

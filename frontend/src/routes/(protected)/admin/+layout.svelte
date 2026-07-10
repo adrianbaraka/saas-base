@@ -5,6 +5,7 @@
 	import ListIcon from '@iconify-svelte/material-symbols/list';
 	import PersonIcon from '@iconify-svelte/material-symbols/person';
 	import SettingsIcon from '@iconify-svelte/material-symbols/settings';
+	import PersonAddIcon from '@iconify-svelte/material-symbols/person-add';
 
 	const links: SideLink[] = [
 		{ href: '/admin/dashboard', name: 'Dashboard', icon: DashboardIcon },
@@ -13,6 +14,7 @@
 			icon: GroupsIcon,
 			children: [
 				{ href: '/admin/users', name: 'All Users', icon: ListIcon },
+				{ href: '/admin/users/create', name: 'New User', icon: PersonAddIcon },
 				{ href: '/admin/users/roles', name: 'Roles', icon: PersonIcon }
 			]
 		},

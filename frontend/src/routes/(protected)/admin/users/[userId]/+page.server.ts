@@ -28,7 +28,7 @@ export const load: PageServerLoad = async ({
 			method: 'POST',
 			body: JSON.stringify(payload)
 		}),
-		backendFetch('/api/v1/roles', request, getClientAddress(), fetch)
+		backendFetch('/api/v1/users/roles', request, getClientAddress(), fetch)
 	]);
 
 	if (userRes.status === 'rejected') error(503, 'Could not reach the server.');

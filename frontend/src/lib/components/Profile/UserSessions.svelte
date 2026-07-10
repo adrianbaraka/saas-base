@@ -2,29 +2,36 @@
 	import { invalidateAll } from '$app/navigation';
 	import type { AuthError, BetterAuthUser, UserSessionFull } from '$lib';
 	import { authClient } from '$lib/auth-client';
-	import Modal from '../Modal.svelte';
 	import Section from '../Section.svelte';
 	import DeleteIcon from '@iconify-svelte/material-symbols/delete';
 	import { showToast } from '../Toast/toastStore.svelte';
+	import { openModal } from '../Modal/modal.svelte';
 
-	let { sessions, mySession, me, isProfile }: 
-	{ sessions: UserSessionFull[]; mySession: UserSessionFull, me: BetterAuthUser, isProfile: boolean } = $props();
+	let {
+		sessions,
+		mySession,
+		me,
+		isProfile
+	}: {
+		sessions: UserSessionFull[];
+		mySession: UserSessionFull;
+		me: BetterAuthUser;
+		isProfile: boolean;
+	} = $props();
 
-	// const myOwnPage = $derived(user.id === me.id);
 	const isAdmin = $derived(me.role === 'admin');
 
 	let sessionToDelete = $state('');
 	let loading = $state(false);
 
-	let modal: ReturnType<typeof Modal>;
-
-
-
 	async function revokeSession() {
 		loading = true;
 		// show confirmation if session to delete is the current one
 		if (sessionToDelete === mySession.token) {
-			const confirmed = await modal.show();
+			const confirmed = await openModal({
+				title: 'Revoke session?',
+				content: ConfirmSessionDelete
+			});
 			if (!confirmed) {
 				loading = false;
 				return;
@@ -32,7 +39,6 @@
 		}
 		let e: AuthError | null = null;
 		if (isAdmin && !isProfile) {
-			
 			const { error } = await authClient.admin.revokeUserSession({
 				sessionToken: sessionToDelete
 			});
@@ -46,32 +52,25 @@
 
 		loading = false;
 		if (e) {
-			showToast('An error occurred revoking the session.', "error")
+			showToast('An error occurred revoking the session.', 'error');
 			console.error(e.message);
 		} else {
-			showToast("Successfully revoked the session.", "success")
+			showToast('Successfully revoked the session.', 'success');
 			await invalidateAll();
 		}
 	}
 </script>
 
-<Section title="User Sessions" badge={NumberSessions} children={UserSessions} />
-
-<!-- Toasts for error and success -->
-
-
-<Modal bind:this={modal} title="Revoke session?">
-	{#snippet children({ confirm, cancel })}
-		<!-- revoke all sessions modal -->
-		<div>
-			<p class="py-4">This is your current session. Revoking it will sign you out immediately.</p>
-			<div class="modal-action">
-				<button class="btn" onclick={cancel}>Cancel</button>
-				<button class="btn btn-error" onclick={confirm}>Confirm</button>
-			</div>
+{#snippet ConfirmSessionDelete({ confirm, cancel }: { confirm: () => void; cancel: () => void })}
+	<!-- revoke all sessions modal -->
+	<div>
+		<p class="py-4">This is your current session. Revoking it will sign you out immediately.</p>
+		<div class="modal-action">
+			<button class="btn" onclick={cancel}>Cancel</button>
+			<button class="btn btn-error" onclick={confirm}>Confirm</button>
 		</div>
-	{/snippet}
-</Modal>
+	</div>
+{/snippet}
 
 <!-- components -->
 {#snippet NumberSessions()}
@@ -129,3 +128,5 @@
 		<div class="text-error">No user sessions</div>
 	{/if}
 {/snippet}
+
+<Section title="User Sessions" badge={NumberSessions} children={UserSessions} />

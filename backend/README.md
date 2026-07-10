@@ -45,7 +45,9 @@
 - For roles and permissions the file `src/lib/permissions.ts` defines them. To add a new role/permissions add them in this file and add the role in `src/lib/auth.ts` under admin plugin.
 
 ## notes
-- On startup the app runs migrations and if an admin user is not found one is created with default credentials that are logged to stdout.
+- On startup the app runs migrations to the db.
+- Also if no admin user is found one is created using the env vars `DEFAULT_ADMIN_EMAIL` and `DEFAULT_ADMIN_NAME` and a welcome email is sent to that email. (Currently this is just logged in the terminal.)
+
 <!-- ## Testing
 
 - The app uses [bun:test](https://bun.com/docs/test) as the test runner.

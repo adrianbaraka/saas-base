@@ -1,10 +1,11 @@
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import path from "node:path";
-import { auth } from "./auth";
 import { db } from "./db";
 import { user } from "./db/schema/auth-schema";
 import { eq } from "drizzle-orm";
-import { randomBytes } from "node:crypto";
+import { nanoid } from "nanoid";
+import { sendWelcomeEmail } from "@routes/v1/users/users.handlers";
+import { env } from "./env";
 
 /**
  * Asserts that a value is neither null nor undefined.
@@ -22,7 +23,7 @@ export function assertExists<T>(
 }
 
 export async function runMigrations() {
-	const url = process.env.DATABASE_URL;
+	const url = env.DATABASE_URL;
 	assertExists(url, "DATABASE_URL env var is not set");
 
 	const migrationsFolder =
@@ -40,37 +41,28 @@ export async function defaultAdmin() {
 		return;
 	}
 
-	let defaultAdminEmail = process.env.DEFAULT_ADMIN_EMAIL;
-	let defaultAdminPassword = process.env.DEFAULT_ADMIN_PASSWORD;
+	// manually create the first admin user
+	const [created] = await db
+		.insert(user)
+		.values({
+			id: nanoid(),
+			name: env.DEFAULT_ADMIN_NAME,
+			email: env.DEFAULT_ADMIN_EMAIL,
+			emailVerified: false,
+			role: "admin",
+		})
+		.returning();
 
-	if (!defaultAdminEmail) {
-		defaultAdminEmail = "admin@localhost.com";
-		console.warn(
-			`DEFAULT_ADMIN_EMAIL not set — using default: ${defaultAdminEmail}`,
-		);
+	if (!created) {
+		console.error("An error occurred creating the default admin user.");
+		process.exit(1);
 	}
-
-	if (!defaultAdminPassword) {
-		defaultAdminPassword = randomBytes(16).toString("hex");
-		console.warn(
-			`DEFAULT_ADMIN_PASSWORD not set — generated one-time password: ${defaultAdminPassword}`,
-		);
-		console.warn("Change this immediately after first login.");
+	const redirectTo = `${env.BETTER_AUTH_URL}/welcome`;
+	try {
+		await sendWelcomeEmail(created.id, created.email, redirectTo);
+		console.log("Default admin account created successfully");
+	} catch (error) {
+		console.error(error);
+		process.exit(1);
 	}
-
-	const created = await auth.api.signUpEmail({
-		body: {
-			name: "admin",
-			email: defaultAdminEmail,
-			password: defaultAdminPassword,
-		},
-	});
-
-	// TODO implement must change password
-	await db
-		.update(user)
-		.set({ role: "admin" })
-		.where(eq(user.id, created.user.id));
-
-	console.log("Default admin account created successfully");
 }

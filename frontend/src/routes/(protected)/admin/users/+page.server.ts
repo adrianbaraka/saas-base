@@ -10,6 +10,13 @@ export interface ListUsersResponse {
 	offset: number;
 }
 
+export interface UserStatsResponse {
+	totalUsers: number;
+	bannedUsers: number;
+	unverifiedUsers: number;
+	adminUsers: number;
+}
+
 export const load: PageServerLoad = async ({ fetch, request, url, locals, getClientAddress }) => {
 	const limit = Number(url.searchParams.get('limit') ?? 20);
 	const offset = Number(url.searchParams.get('offset') ?? 0);
@@ -25,29 +32,32 @@ export const load: PageServerLoad = async ({ fetch, request, url, locals, getCli
 		...(search && { searchValue: search, searchField: 'email', searchOperator: 'contains' })
 	});
 
-	let res: Response;
+	let usersRes: Response;
+	let statsRes: Response;
 
 	try {
-		res = await backendFetch(
-			`/api/auth/admin/list-users?${query}`,
-			request,
-			getClientAddress(),
-			fetch
-		);
+		[usersRes, statsRes] = await Promise.all([
+			backendFetch(`/api/auth/admin/list-users?${query}`, request, getClientAddress(), fetch),
+			backendFetch('/api/v1/users/stats', request, getClientAddress(), fetch)
+		]);
 	} catch {
 		error(503, 'Could not reach the server.');
 	}
 
-	switch (res.status) {
-		case 401:
-			error(401, 'Unauthenticated');
-		case 403:
-			error(403, 'Unauthorized');
+	for (const res of [usersRes, statsRes]) {
+		switch (res.status) {
+			case 401:
+				error(401, 'Unauthenticated');
+			case 403:
+				error(403, 'Unauthorized');
+		}
+		if (!res.ok) error(res.status, 'Failed to load users');
 	}
 
-	if (!res.ok) error(res.status, 'Failed to load users');
-
-	const data: ListUsersResponse = await res.json();
+	const [data, stats]: [ListUsersResponse, UserStatsResponse] = await Promise.all([
+		usersRes.json(),
+		statsRes.json()
+	]);
 
 	return {
 		users: data.users,
@@ -57,6 +67,7 @@ export const load: PageServerLoad = async ({ fetch, request, url, locals, getCli
 		search,
 		sortBy,
 		sortDirection,
-		me: locals.session?.user
+		me: locals.session?.user,
+		stats
 	};
 };

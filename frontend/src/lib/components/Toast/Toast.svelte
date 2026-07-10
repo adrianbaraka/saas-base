@@ -33,7 +33,7 @@
 	});
 </script>
 
-<div class="alert {alertClass}" transition:fly={{ x: 200, duration: 300 }}>
+<div class="text-wrap max-w-md alert {alertClass}" transition:fly={{ x: 200, duration: 300 }}>
 	<Icon height="24" />
 	<span>{message}</span>
 </div>

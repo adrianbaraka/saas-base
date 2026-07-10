@@ -1,8 +1,8 @@
 import { Elysia, t } from "elysia";
 import { betterAuthRoute, Docs } from "@lib/auth";
 import { template } from "@routes/v1/template/template";
-import { RolesRoutes } from "@routes/v1/roles/roles";
-import { defaultAdmin, runMigrations } from "@lib/utils";
+import { defaultAdmin, runMigrations} from "@lib/utils";
+import { usersRoutes } from "@routes/v1/users/users";
 
 const healthCheck = new Elysia().get("/health", () => ({ success: true }), {
 	response: { 200: t.Object({ success: t.Boolean() }) },
@@ -30,7 +30,7 @@ async function main() {
 			if (!isProduction) {
 				v1.use(template);
 			}
-			v1.use(RolesRoutes);
+			v1.use(usersRoutes);
 			return v1;
 		})
 		.listen(8000);

@@ -24,6 +24,8 @@ services:
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
       - BETTER_AUTH_URL=${APP_URL}
       - DATABASE_URL=${DATABASE_URL}
+      - DEFAULT_ADMIN_NAME=${DEFAULT_ADMIN_NAME}
+      - DEFAULT_ADMIN_EMAIL=${DEFAULT_ADMIN_EMAIL}
     depends_on:
       base-db:
         condition: service_healthy

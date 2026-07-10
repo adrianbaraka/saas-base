@@ -1,5 +1,8 @@
 import { env } from '$env/dynamic/private';
 
+/**
+ * sets the cookies(session) and the client ip
+ */
 export function backendFetch(
 	path: string,
 	request: Request,

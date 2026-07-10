@@ -16,7 +16,7 @@ type RolesFullResponse = {
 export const load: PageServerLoad = async ({ fetch, request, locals, getClientAddress }) => {
 	let res: Response;
 	try {
-		res = await backendFetch('/api/v1/roles/full', request, getClientAddress(), fetch);
+		res = await backendFetch('/api/v1/users/roles/full', request, getClientAddress(), fetch);
 	} catch (e) {
 		console.error(e);
 		error(503, 'An Unexpected error occurred.');

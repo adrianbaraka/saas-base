@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import type { BetterAuthUser } from '$lib';
-	import Modal from '../Modal.svelte';
+	import { openModal } from '../Modal/modal.svelte';
 	import Section from '../Section.svelte';
 	import { showToast } from '../Toast/toastStore.svelte';
 
@@ -17,8 +17,6 @@
 		isProfile: boolean;
 	} = $props();
 
-	let modal: ReturnType<typeof Modal>;
-
 	const myOwnPage = $derived(user.id === me.id);
 	const isAdmin = $derived(me.role === 'admin');
 
@@ -32,7 +30,11 @@
 
 		if (myOwnPage) {
 			pendingRole = newRole;
-			const confirmed = await modal.show();
+			//const confirmed = await modal.show();
+			const confirmed = await openModal({
+				title: "Change your own role?",
+				content: ConfirmRoleChange
+			})
 			if (!confirmed) {
 				selectedRole = user.role;
 				return;
@@ -77,7 +79,7 @@
 {/if}
 
 {#snippet roleContent()}
-	<label class="form-control p-5">
+	<label class="form-control">
 		<div class="label">
 			<span class="label-text">Role</span>
 		</div>
@@ -103,7 +105,20 @@
 	<div class="badge badge-ghost badge-sm">{user.role}</div>
 {/snippet}
 
-<Modal bind:this={modal} title="Change your own role?">
+	{#snippet ConfirmRoleChange({ confirm, cancel }: { confirm: () => void; cancel: () => void })}
+		<div>
+			<p class="py-4">
+				You're changing your own role to <strong>{pendingRole}</strong>. If this removes your admin
+				access, you may lose the ability to manage users, including reverting this change yourself.
+			</p>
+			<div class="modal-action">
+				<button class="btn" onclick={cancel}>Cancel</button>
+				<button class="btn btn-error" onclick={confirm}>Confirm</button>
+			</div>
+		</div>
+	{/snippet}
+
+<!-- <Modal bind:this={modal} title="Change your own role?">
 	{#snippet children({ confirm, cancel })}
 		<div>
 			<p class="py-4">
@@ -116,4 +131,4 @@
 			</div>
 		</div>
 	{/snippet}
-</Modal>
+</Modal> -->

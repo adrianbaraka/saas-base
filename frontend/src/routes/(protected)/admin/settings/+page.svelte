@@ -1,13 +1,12 @@
 <script lang="ts">
-	import UserProfilePage from '$lib/components/Profile/UserProfilePage.svelte';
+	import SettingsPage from '$lib/components/Profile/SettingsPage.svelte';
 	let { data } = $props();
 </script>
 
 {#if data.mySession}
-	<UserProfilePage
-		mySession={data.mySession}
-		userToShow={data.mySession.user}
-		isProfile
-		allSessionsToShow={data.allMySessions}
+	<SettingsPage
+		me={data.mySession?.user}
+		mySession={data.mySession.session}
+		sessions={data.allMySessions}
 	/>
 {/if}

@@ -16,7 +16,8 @@
 		"drizzle-orm": "^0.45.2",
 		"drizzle-typebox": "^0.3.3",
 		"elysia": "^1.4.29",
-		"pg": "^8.22.0"
+		"pg": "^8.22.0",
+		"resend": "^6.17.2"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

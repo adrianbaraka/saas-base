@@ -4,16 +4,6 @@ import { authClient } from './auth-client';
 export type BetterAuthUser = typeof authClient.$Infer.Session.user;
 export type UserSessionFull = typeof authClient.$Infer.Session.session;
 
-// export type UserSession = {
-// 	id: string;
-// 	expiresAt: Date;
-// 	createdAt: Date;
-// 	updatedAt: Date;
-// 	userId: string;
-// 	impersonatedBy?: string | null | undefined;
-// 	ipAddress?: string | null | undefined;
-// 	userAgent?: string | null | undefined;
-// };
 export type BetterAuthSession = {
 	session: UserSessionFull;
 	user: BetterAuthUser;
@@ -43,3 +33,7 @@ export interface Role {
 export type IconComponent = new (...args: any[]) => any;
 
 export type ToastType = 'error' | 'warning' | 'success';
+
+export interface ErrorResponse {
+	error: string;
+}

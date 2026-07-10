@@ -24,6 +24,6 @@
 				{@render badge()}
 			{/if}
 		</div>
-		{@render children()}
+		<div class="p-4 w-full">{@render children()}</div>
 	</div>
 </div>
