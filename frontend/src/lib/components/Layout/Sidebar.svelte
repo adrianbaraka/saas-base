@@ -3,28 +3,23 @@
 	import MenuIcon from '@iconify-svelte/material-symbols/menu';
 	import ChevronDownIcon from '@iconify-svelte/material-symbols/keyboard-arrow-down';
 	import { page } from '$app/state';
-	import type { IconComponent } from '$lib';
-
-
-	export interface SideLink {
-		href?: string;
-		name: string;
-		icon: IconComponent;
-		children?: SideLink[];
-	}
+	import type { IconComponent, SideLink } from '$lib';
+	import { isSidebarOpen, closeSidebar, toggleSidebar } from './sidebarStore.svelte';
+	import type { Snippet } from 'svelte';
 
 	interface Props {
 		links: SideLink[];
-		children: import('svelte').Snippet;
+		children: Snippet;
 		logo?: IconComponent;
 		appName?: string;
 	}
 
 	let { links, children, logo: Logo = SchoolIcon, appName = 'Name' }: Props = $props();
-	let collapsed = $state(false);
-	const current = $derived(page.url.pathname);
 
-	// track open/closed state per parent link by name
+	// desktop: icon-only collapse (independent of mobile drawer)
+	let collapsed = $state(false);
+
+	const current = $derived(page.url.pathname);
 	let openGroups = $state<Record<string, boolean>>({});
 
 	function toggleGroup(name: string) {
@@ -37,7 +32,19 @@
 </script>
 
 <div class="flex flex-col lg:flex-row h-screen">
-	<nav class="bg-primary lg:h-screen sticky z-20 top-0 lg:self-start lg:overflow-y-auto min-w-fit">
+	{#if isSidebarOpen()}
+		<button
+			class="fixed inset-0 bg-black/50 z-10 lg:hidden"
+			onclick={closeSidebar}
+			aria-label="Close menu"
+		></button>
+	{/if}
+
+	<nav
+		class={`bg-base-100 h-screen fixed inset-y-0 left-0 z-20 w-64 transform transition-transform duration-300 ease-in-out
+			${isSidebarOpen() ? 'translate-x-0' : '-translate-x-full'}
+			lg:translate-x-0 lg:sticky lg:top-0 lg:self-start lg:overflow-y-auto lg:w-auto lg:min-w-fit`}
+	>
 		<div class="flex gap-3 justify-between items-center pt-5 px-5">
 			<div class={`${collapsed ? 'block lg:hidden' : ''}`}>
 				<Logo height="30" />
@@ -47,6 +54,7 @@
 				class="cursor-pointer hover:scale-110"
 				onclick={() => {
 					collapsed = !collapsed;
+					toggleSidebar();
 				}}
 			>
 				<MenuIcon height="25" aria-label="Menu Icon" />
@@ -55,13 +63,10 @@
 
 		<hr class="m-3 mx-10" />
 
-		<ul
-			class={`${collapsed ? 'hidden lg:flex' : ''} flex flex-col justify-center items-center p-2 cursor-pointer gap-2`}
-		>
+		<ul class="flex flex-col justify-center items-center p-2 cursor-pointer gap-2">
 			{#each links as link}
 				<li class="w-full">
 					{#if link.children?.length}
-						<!-- parent with children: accordion trigger -->
 						<button
 							type="button"
 							onclick={() => toggleGroup(link.name)}
@@ -84,7 +89,11 @@
 									<li
 										class={`hover:bg-blue-500 dark:hover:bg-blue-950 hover:underline p-2 rounded-xl ${current === child.href ? 'bg-blue-500 dark:bg-blue-950' : ''}`}
 									>
-										<a href={child.href} class="flex gap-3 items-center text-sm">
+										<a
+											href={child.href}
+											class="flex gap-3 items-center text-sm"
+											onclick={closeSidebar}
+										>
 											<span title={child.name}><child.icon height="16" /></span>
 											<span>{child.name}</span>
 										</a>
@@ -96,6 +105,7 @@
 						<a
 							href={link.href}
 							class={`hover:bg-blue-500 dark:hover:bg-blue-950 hover:underline p-3 w-full rounded-xl flex lg:block ${current === link.href ? 'bg-blue-500 dark:bg-blue-950' : ''}`}
+							onclick={closeSidebar}
 						>
 							<span class="flex gap-4 items-center">
 								<span title={link.name}><link.icon height="20" /></span>

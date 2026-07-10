@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import Appbar from '$lib/components/Appbar.svelte';
+	import Appbar from '$lib/components/Layout/Appbar.svelte';
 	import type { PageProps } from './$types';
 	import SearchIcon from '@iconify-svelte/material-symbols/search';
 	import CheckIcon from '@iconify-svelte/material-symbols/check';

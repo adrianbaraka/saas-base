@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Appbar from '$lib/components/Appbar.svelte';
+	import Appbar from '$lib/components/Layout/Appbar.svelte';
 	import BanUnban from '$lib/components/Profile/actions/BanUnban.svelte';
 	import EditInfo from '$lib/components/Profile/actions/EditInfo.svelte';
 	import RevokeAllSessions from '$lib/components/Profile/actions/RevokeAllSessions.svelte';

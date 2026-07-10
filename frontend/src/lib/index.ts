@@ -37,3 +37,10 @@ export type ToastType = 'error' | 'warning' | 'success';
 export interface ErrorResponse {
 	error: string;
 }
+
+export interface SideLink {
+	href?: string;
+	name: string;
+	icon: IconComponent;
+	children?: SideLink[];
+}

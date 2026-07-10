@@ -1,11 +1,12 @@
 <script lang="ts">
-	import MainLayout, { type SideLink } from '$lib/components/MainLayout.svelte';
 	import DashboardIcon from '@iconify-svelte/material-symbols/dashboard';
 	import GroupsIcon from '@iconify-svelte/material-symbols/groups';
 	import ListIcon from '@iconify-svelte/material-symbols/list';
 	import PersonIcon from '@iconify-svelte/material-symbols/person';
 	import SettingsIcon from '@iconify-svelte/material-symbols/settings';
 	import PersonAddIcon from '@iconify-svelte/material-symbols/person-add';
+	import Sidebar from '$lib/components/Layout/Sidebar.svelte';
+	import type { SideLink } from '$lib';
 
 	const links: SideLink[] = [
 		{ href: '/admin/dashboard', name: 'Dashboard', icon: DashboardIcon },
@@ -23,6 +24,6 @@
 	let { children } = $props();
 </script>
 
-<MainLayout {links}>
+<Sidebar {links}>
 	{@render children()}
-</MainLayout>
+</Sidebar>

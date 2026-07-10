@@ -3,8 +3,10 @@
 	import type { BetterAuthUser } from '$lib';
 	import { authClient } from '$lib/auth-client';
 	import type { Snippet } from 'svelte';
-	import { showToast } from './Toast/toastStore.svelte';
 	import { rolePrefix } from '$lib/roles';
+	import MenuIcon from '@iconify-svelte/material-symbols/menu';
+	import { showToast } from '../Toast/toastStore.svelte';
+	import { toggleSidebar } from './sidebarStore.svelte';
 
 	let {
 		user,
@@ -38,7 +40,12 @@
 </script>
 
 <div class="flex h-full flex-col">
-	<header class="navbar sticky top-0 z-20 bg-base-100 shadow-xl rounded-xl">
+	<header class="navbar sticky top-0 z-10 shadow-xl rounded-xl gap-2 bg-primary">
+		<div class="flex-none lg:hidden">
+			<button class="btn btn-ghost btn-circle" onclick={toggleSidebar} aria-label="Toggle menu">
+				<MenuIcon height="22" />
+			</button>
+		</div>
 		<div class="flex-1">
 			<div class="flex flex-col gap-2">
 				<div class="text-xl font-bold">{title}</div>
@@ -76,7 +83,7 @@
 					</li>
 					<hr class="my-2" />
 					<li>
-						<a class="justify-between" href={profileURL}> My Profile </a>
+						<a class="justify-between" href={profileURL}>My Profile</a>
 					</li>
 					<li><a href={settingsURL}>Settings</a></li>
 					<li class="text-error">

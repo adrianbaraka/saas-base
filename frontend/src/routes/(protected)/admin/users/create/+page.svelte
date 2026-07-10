@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { applyAction, enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import Appbar from '$lib/components/Appbar.svelte';
+	import Appbar from '$lib/components/Layout/Appbar.svelte';
 	import Section from '$lib/components/Section.svelte';
 	import { showToast } from '$lib/components/Toast/toastStore.svelte.js';
 	import UserDetailsFields from '$lib/components/UserDetailsFields.svelte';
@@ -10,7 +10,7 @@
 	let { data, form } = $props();
 
 	let submitting = $state(false);
-	let sendWelcome = $state(false)
+	let sendWelcome = $state(false);
 </script>
 
 <Appbar title="Create a new user" description="" user={data.me}>
@@ -20,7 +20,7 @@
 				method="POST"
 				action="?/createUser"
 				class="grid grid-cols-1 md:grid-cols-2 gap-4"
-				use:enhance={({formData}) => {
+				use:enhance={({ formData }) => {
 					submitting = true;
 					const email = formData.get('email') as string;
 					const sendEmail = formData.get('sendEmail') === 'on';
@@ -34,7 +34,9 @@
 							goto(result.location);
 						} else if (result.type === 'failure') {
 							const message =
-								typeof result.data?.error === 'string' ? result.data.error : 'Failed to create user';
+								typeof result.data?.error === 'string'
+									? result.data.error
+									: 'Failed to create user';
 							showToast(message, 'error');
 							await applyAction(result);
 						} else {
@@ -46,7 +48,13 @@
 				<fieldset disabled={submitting} class="contents">
 					<UserDetailsFields roles={data.roles} />
 					<label class="label text-base-content">
-						<input type="checkbox" class="checkbox" name="sendEmail" id="sendEmail" bind:checked={sendWelcome}/>
+						<input
+							type="checkbox"
+							class="checkbox"
+							name="sendEmail"
+							id="sendEmail"
+							bind:checked={sendWelcome}
+						/>
 						Send Welcome Email
 					</label>
 				</fieldset>
@@ -66,39 +74,38 @@
 			</form>
 		</Section>
 
-<Section title="How it works" vertical>
-	<div class="flex flex-col gap-4 p-1 text-sm">
-		<div class="flex gap-3">
-			<div class="badge badge-success badge-sm mt-0.5 shrink-0">✓</div>
-			<p class="">
-				<span class="font-semibold">Send Welcome Email checked</span>
-				<span class="font-serif tracking-wide">
-					<br>The user receives an email with a setup link.
-					<br>Clicking it lets them set their own
-					password, after which their account is verified and they can log in.
-				</span>
-			</p>
-		</div>
+		<Section title="How it works" vertical>
+			<div class="flex flex-col gap-4 p-1 text-sm">
+				<div class="flex gap-3">
+					<div class="badge badge-success badge-sm mt-0.5 shrink-0">✓</div>
+					<p class="">
+						<span class="font-semibold">Send Welcome Email checked</span>
+						<span class="font-serif tracking-wide">
+							<br />The user receives an email with a setup link.
+							<br />Clicking it lets them set their own password, after which their account is
+							verified and they can log in.
+						</span>
+					</p>
+				</div>
 
-		<div class="flex gap-3">
-			<div class="badge badge-warning badge-sm mt-0.5 shrink-0">!</div>
-			<p>
-				<span class="font-semibold">Send Welcome Email unchecked</span> 
-				<span class="font-serif tracking-wide">
-					<br>The
-					account is created immediately, but the user cannot log in until a
-					password is set.
-				</span>
-			</p>
-		</div>
+				<div class="flex gap-3">
+					<div class="badge badge-warning badge-sm mt-0.5 shrink-0">!</div>
+					<p>
+						<span class="font-semibold">Send Welcome Email unchecked</span>
+						<span class="font-serif tracking-wide">
+							<br />The account is created immediately, but the user cannot log in until a password
+							is set.
+						</span>
+					</p>
+				</div>
 
-		<div class="divider my-0"></div>
+				<div class="divider my-0"></div>
 
-		<p class="text-base-content/70 italic">
-			A welcome email can be sent later at any time from this user's profile
-			page if it wasn't sent during creation.
-		</p>
-	</div>
-</Section>
+				<p class="text-base-content/70 italic">
+					A welcome email can be sent later at any time from this user's profile page if it wasn't
+					sent during creation.
+				</p>
+			</div>
+		</Section>
 	</div>
 </Appbar>

@@ -47,6 +47,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		switch (res.status) {
 			case 401:
 				error(401, 'Unauthenticated');
+				break
 			case 403:
 				error(403, 'Unauthorized');
 		}

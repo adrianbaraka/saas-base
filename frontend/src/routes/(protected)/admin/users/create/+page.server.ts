@@ -18,6 +18,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	switch (res.status) {
 		case 401:
 			error(401, 'Unauthenticated');
+			break;
 		case 403:
 			error(403, 'Unauthorized');
 	}
@@ -65,7 +66,9 @@ export const actions: Actions = {
 			});
 		}
 		const payLoad = {
-			name: `${fullPayLoad.firstName} ${fullPayLoad.middleName} ${fullPayLoad.lastName}`,
+			name: [fullPayLoad.firstName, fullPayLoad.middleName, fullPayLoad.lastName]
+				.filter((part): part is string => Boolean(part && part.trim()))
+				.join(' '),
 			email: fullPayLoad.email,
 			role: fullPayLoad.role
 		};
