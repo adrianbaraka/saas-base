@@ -2,7 +2,7 @@
 	import MailIcon from '@iconify-svelte/material-symbols/mail';
 	import type { BetterAuthUser } from '$lib';
 	import { getInviteStatus, welcomeEmailSend } from '$lib/utils';
-	import { openModal } from '$lib/components/Modal/modal.svelte';
+	import { openModal } from '$lib/components/Modal/modalStore.svelte';
 
 	let { user, me }: { user: BetterAuthUser; me: BetterAuthUser } = $props();
 

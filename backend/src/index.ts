@@ -18,7 +18,7 @@ async function main() {
 		await defaultAdmin();
 	} catch (err) {
 		console.error(err);
-		//process.exit(2);
+		process.exit(1);
 	}
 
 	const app = new Elysia()

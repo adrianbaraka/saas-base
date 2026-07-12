@@ -139,18 +139,4 @@ export const Docs = new Elysia({ name: "docs" }).use(
 	}),
 );
 
-// checks that user is authenticated
-export const authMacro = new Elysia({ name: "auth-macro" }).macro({
-	isAuthenticated: (_enabled: boolean) => ({
-		async resolve({ status, request: { headers } }) {
-			const { auth } = await import("@lib/auth");
-			const session = await auth.api.getSession({ headers });
-			if (!session) return status(401, { error: "Unauthenticated." });
 
-			return {
-				user: session.user,
-				session: session.session,
-			};
-		},
-	}),
-});

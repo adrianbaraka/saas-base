@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getModal, confirmModal, cancelModal } from './modal.svelte';
+	import { getModal, cancelModal, confirmModal } from './modalStore.svelte';
 
 	let dialog: HTMLDialogElement;
 

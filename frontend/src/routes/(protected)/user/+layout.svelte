@@ -14,6 +14,3 @@
 <Sidebar {links}>
 	{@render children()}
 </Sidebar>
-<!-- <MainLayout {links}>
-	{@render children()}
-</MainLayout> -->

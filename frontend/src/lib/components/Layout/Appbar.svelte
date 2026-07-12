@@ -40,7 +40,7 @@
 </script>
 
 <div class="flex h-full flex-col">
-	<header class="navbar sticky top-0 z-10 shadow-xl rounded-xl gap-2 bg-primary">
+	<header class="navbar sticky top-0 z-10 shadow-xl rounded-xl gap-2 lg:bg-base-100 lg:shadow-2xl bg-primary">
 		<div class="flex-none lg:hidden">
 			<button class="btn btn-ghost btn-circle" onclick={toggleSidebar} aria-label="Toggle menu">
 				<MenuIcon height="22" />

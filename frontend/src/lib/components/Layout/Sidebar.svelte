@@ -41,7 +41,7 @@
 	{/if}
 
 	<nav
-		class={`bg-base-100 h-screen fixed inset-y-0 left-0 z-20 w-64 transform transition-transform duration-300 ease-in-out
+		class={`bg-base-100 lg:bg-primary h-screen fixed inset-y-0 left-0 z-20 w-64 transform transition-transform duration-300 ease-in-out
 			${isSidebarOpen() ? 'translate-x-0' : '-translate-x-full'}
 			lg:translate-x-0 lg:sticky lg:top-0 lg:self-start lg:overflow-y-auto lg:w-auto lg:min-w-fit`}
 	>
@@ -74,16 +74,16 @@
 						>
 							<span class="flex gap-4 items-center">
 								<span title={link.name}><link.icon height="20" /></span>
-								<span class={collapsed ? 'hidden' : ''}>{link.name}</span>
+								<span class={collapsed ? 'lg:hidden' : ''}>{link.name}</span>
 							</span>
 							<span
-								class={`${collapsed ? 'hidden' : ''} transition-transform duration-200 ${openGroups[link.name] ? 'rotate-180' : ''}`}
+								class={`${collapsed ? 'lg:hidden' : ''} transition-transform duration-200 ${openGroups[link.name] ? 'rotate-180' : ''}`}
 							>
 								<ChevronDownIcon height="18" />
 							</span>
 						</button>
 
-						{#if openGroups[link.name] && !collapsed}
+						{#if openGroups[link.name]}
 							<ul class="flex flex-col gap-1 pl-10 pr-2 pt-1">
 								{#each link.children as child}
 									<li
@@ -95,7 +95,7 @@
 											onclick={closeSidebar}
 										>
 											<span title={child.name}><child.icon height="16" /></span>
-											<span>{child.name}</span>
+											<span class={collapsed ? 'lg:hidden' : ''}>{child.name}</span>
 										</a>
 									</li>
 								{/each}
@@ -109,7 +109,7 @@
 						>
 							<span class="flex gap-4 items-center">
 								<span title={link.name}><link.icon height="20" /></span>
-								<span class={collapsed ? 'hidden' : ''}>{link.name}</span>
+								<span class={collapsed ? 'lg:hidden' : ''}>{link.name}</span>
 							</span>
 						</a>
 					{/if}

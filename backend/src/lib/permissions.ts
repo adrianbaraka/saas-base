@@ -1,6 +1,23 @@
 import { createAccessControl } from "better-auth/plugins/access";
 import { defaultStatements } from "better-auth/plugins/admin/access";
 import { auth } from "./auth";
+import { Elysia } from "elysia"
+
+// checks that user is authenticated
+export const authMacro = new Elysia({ name: "auth-macro" }).macro({
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	isAuthenticated: (_enabled: boolean) => ({
+		async resolve({ status, request: { headers } }) {
+			const session = await auth.api.getSession({ headers });
+			if (!session) return status(401, { error: "Unauthenticated." });
+
+			return {
+				user: session.user,
+				session: session.session,
+			};
+		},
+	}),
+});
 
 // system modules for example the module roles has the permissions list etc...
 const statement = {

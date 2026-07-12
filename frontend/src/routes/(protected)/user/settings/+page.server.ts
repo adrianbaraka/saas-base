@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import type { UserSessionFull } from '$lib';
 
-export const load: PageServerLoad = async ({ locals}) => {
+export const load: PageServerLoad = async ({ locals }) => {
 	let res: Response;
 	try {
 		res = await locals.backendFetch('/api/auth/list-sessions');
@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ locals}) => {
 	switch (res.status) {
 		case 401:
 			error(401, 'Unauthenticated');
-			break
+			break;
 		case 403:
 			error(403, 'Unauthorized');
 	}

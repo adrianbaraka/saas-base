@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import type { BetterAuthUser } from '$lib';
-	import { openModal } from '../Modal/modal.svelte';
+	import { openModal } from '../Modal/modalStore.svelte';
 	import Section from '../Section.svelte';
 	import { showToast } from '../Toast/toastStore.svelte';
 
@@ -32,9 +32,9 @@
 			pendingRole = newRole;
 			//const confirmed = await modal.show();
 			const confirmed = await openModal({
-				title: "Change your own role?",
+				title: 'Change your own role?',
 				content: ConfirmRoleChange
-			})
+			});
 			if (!confirmed) {
 				selectedRole = user.role;
 				return;
@@ -61,18 +61,17 @@
 				const body = await res.json().catch(() => null);
 				throw new Error(body?.message ?? 'Failed to update role');
 			}
-			showToast(`Role updated to ${newRole}`, 'success')
+			showToast(`Role updated to ${newRole}`, 'success');
 			await invalidateAll();
 		} catch (err) {
 			console.error(err);
 			selectedRole = user.role;
-			showToast('An error occurred updating the role', "error")
+			showToast('An error occurred updating the role', 'error');
 		} finally {
 			updatingRole = false;
 		}
 	}
 </script>
-
 
 {#if isAdmin && !isProfile}
 	<Section title="Role" children={roleContent} badge={CurrentRole} vertical />
@@ -105,18 +104,18 @@
 	<div class="badge badge-ghost badge-sm">{user.role}</div>
 {/snippet}
 
-	{#snippet ConfirmRoleChange({ confirm, cancel }: { confirm: () => void; cancel: () => void })}
-		<div>
-			<p class="py-4">
-				You're changing your own role to <strong>{pendingRole}</strong>. If this removes your admin
-				access, you may lose the ability to manage users, including reverting this change yourself.
-			</p>
-			<div class="modal-action">
-				<button class="btn" onclick={cancel}>Cancel</button>
-				<button class="btn btn-error" onclick={confirm}>Confirm</button>
-			</div>
+{#snippet ConfirmRoleChange({ confirm, cancel }: { confirm: () => void; cancel: () => void })}
+	<div>
+		<p class="py-4">
+			You're changing your own role to <strong>{pendingRole}</strong>. If this removes your admin
+			access, you may lose the ability to manage users, including reverting this change yourself.
+		</p>
+		<div class="modal-action">
+			<button class="btn" onclick={cancel}>Cancel</button>
+			<button class="btn btn-error" onclick={confirm}>Confirm</button>
 		</div>
-	{/snippet}
+	</div>
+{/snippet}
 
 <!-- <Modal bind:this={modal} title="Change your own role?">
 	{#snippet children({ confirm, cancel })}

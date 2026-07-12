@@ -7,6 +7,7 @@ export default defineConfig([
 	{
 		ignores: ['.svelte-kit/**', 'build/**', 'dist/**', 'node_modules/**']
 	},
+
 	{
 		files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
 		plugins: { js },

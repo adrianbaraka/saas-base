@@ -1,6 +1,6 @@
 ## Overview
-A base frontend for the elysia backend built with [Sveltekit](https://svelte.dev/docs/kit/introduction), [DaisyUI](https://daisyui.com/components/) and [Iconify](https://icon-sets.iconify.design/material-symbols/).
 
+A base frontend for the elysia backend built with [Sveltekit](https://svelte.dev/docs/kit/introduction), [DaisyUI](https://daisyui.com/components/) and [Iconify](https://icon-sets.iconify.design/material-symbols/).
 
 ## Folder structure
 
@@ -69,23 +69,23 @@ A base frontend for the elysia backend built with [Sveltekit](https://svelte.dev
 
 - To access the users info in a page the `+page.server.ts` returns the object and can be accessed in the `+page.svelte`
 
-    ```TS
-    // +page.server.ts
-    import type { PageServerLoad } from './$types';
-    export const load: PageServerLoad = async ({ locals }) => {
-        return { session: locals.session };
-    };
+  ```TS
+  // +page.server.ts
+  import type { PageServerLoad } from './$types';
+  export const load: PageServerLoad = async ({ locals }) => {
+      return { session: locals.session };
+  };
 
-    // +page.svelte
-    <script lang="ts">
-        import Appbar from '$lib/components/Appbar.svelte';
-        let { data } = $props();
-    </script>
+  // +page.svelte
+  <script lang="ts">
+      import Appbar from '$lib/components/Appbar.svelte';
+      let { data } = $props();
+  </script>
 
-    <Appbar title="Default User page" description="" user={data.session?.user}>
-        <div>User page</div>
-    </Appbar>
-    ```
+  <Appbar title="Default User page" description="" user={data.session?.user}>
+      <div>User page</div>
+  </Appbar>
+  ```
 
 ### Adding a new module
 

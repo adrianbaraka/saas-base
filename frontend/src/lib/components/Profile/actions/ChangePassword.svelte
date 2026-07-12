@@ -5,7 +5,7 @@
 	import KeyIcon from '@iconify-svelte/material-symbols/key';
 	import { authClient } from '$lib/auth-client'; // adjust path as needed
 	import { showToast } from '../../Toast/toastStore.svelte';
-	import { cancelModal, openModal } from '$lib/components/Modal/modal.svelte';
+	import { cancelModal, openModal } from '$lib/components/Modal/modalStore.svelte';
 
 	let formEl: HTMLFormElement;
 

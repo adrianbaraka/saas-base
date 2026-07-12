@@ -42,7 +42,6 @@ type InviteStatus = 'none' | 'pending' | 'expired';
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in MS
 
 export function getInviteStatus(welcomeEmailSentAt: Date | string | null): InviteStatus {
-
 	if (!welcomeEmailSentAt) return 'none';
 
 	const sentAt =

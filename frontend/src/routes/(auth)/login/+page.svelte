@@ -29,12 +29,12 @@
 			if (res.error) {
 				throw new Error(res.error.message);
 			}
-			const userDashboard = `${rolePrefix(res.data.user.role)}/dashboard`
+			const userDashboard = `${rolePrefix(res.data.user.role)}/dashboard`;
 			await goto(userDashboard);
 		} catch (e) {
-			showToast( e instanceof Error ? e.message : 'Failed to log in', "error")
+			showToast(e instanceof Error ? e.message : 'Failed to log in', 'error');
 			console.error(e instanceof Error && e.message);
-			
+
 			errorVisible = true;
 			setTimeout(() => (errorVisible = false), 5000);
 		} finally {

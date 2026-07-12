@@ -16,7 +16,7 @@ export function getModal() {
 
 export function openModal(options: { title?: string; content: ModalContent }): Promise<boolean> {
 	// cannot have 2 modals at once
-    if (modal) {
+	if (modal) {
 		return Promise.reject(new Error('A modal is already open'));
 	}
 

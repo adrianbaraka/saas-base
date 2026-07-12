@@ -1,6 +1,5 @@
 import Elysia, { t } from "elysia";
 import { ErrorResponse } from "@lib/interfaces";
-import { authMacro } from "@lib/auth";
 import {
 	handleNoInput,
 	handleWithParams,
@@ -10,7 +9,7 @@ import {
 	WithQuerySchema,
 	WithBodySchema,
 } from "./template.handlers";
-import { prettyPrintPermission } from "@lib/permissions";
+import { authMacro, prettyPrintPermission } from "@lib/permissions";
 
 /////////////////////////////////////////////////////
 // Routes

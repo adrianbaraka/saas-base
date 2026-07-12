@@ -118,7 +118,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	let { data } = $props();
 </script>
 
-<Appbar title="Default User page" description="" user={data.me}>
+<Appbar title="Default User page" description="" user="{data.me}">
 	<div>User page for non admin</div>
 </Appbar>
 ```

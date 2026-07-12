@@ -5,8 +5,8 @@
 	import type { BetterAuthUser } from '$lib';
 	import { authClient } from '$lib/auth-client';
 	import { showToast } from '$lib/components/Toast/toastStore.svelte';
-	import { cancelModal, openModal } from '$lib/components/Modal/modal.svelte';
 	import { isEffectivelyBanned } from '$lib/utils';
+	import { openModal, cancelModal } from '$lib/components/Modal/modalStore.svelte';
 
 	let { user, me }: { user: BetterAuthUser; me: BetterAuthUser } = $props();
 	const myOwnPage = $derived(me.id === user.id ? true : false);

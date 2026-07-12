@@ -1,19 +1,18 @@
 <script lang="ts">
 	import Appbar from '$lib/components/Layout/Appbar.svelte';
-	import { openModal } from '$lib/components/Modal/modal.svelte';
+	import { openModal } from '$lib/components/Modal/modalStore.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
-		async function handleClick() {
-			const confirmed = await openModal({
-				title: 'Are you sure?',
-				content: confirmSnippet
+	async function handleClick() {
+		const confirmed = await openModal({
+			title: 'Are you sure?',
+			content: confirmSnippet
 		});
 		if (confirmed) {
-			console.log("confirmed");
+			console.log('confirmed');
 		} else {
-			console.log("not confirmed");
-			
+			console.log('not confirmed');
 		}
 	}
 </script>
@@ -26,13 +25,7 @@
 	</div>
 {/snippet}
 
-<Appbar
-	user={data.me}
-	title="Dashboard"
-	description="An overview of overall system stats."
->
+<Appbar user={data.me} title="Dashboard" description="An overview of overall system stats.">
 	<div class="">hello dashboard</div>
 	<button class="btn" onclick={handleClick}>click me</button>
 </Appbar>
-
-

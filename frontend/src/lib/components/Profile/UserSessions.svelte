@@ -5,7 +5,7 @@
 	import Section from '../Section.svelte';
 	import DeleteIcon from '@iconify-svelte/material-symbols/delete';
 	import { showToast } from '../Toast/toastStore.svelte';
-	import { openModal } from '../Modal/modal.svelte';
+	import { openModal } from '../Modal/modalStore.svelte';
 
 	let {
 		sessions,

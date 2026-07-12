@@ -3,8 +3,8 @@
 	import { invalidateAll } from '$app/navigation';
 	import type { AuthError, BetterAuthUser } from '$lib';
 	import { authClient } from '$lib/auth-client';
-	import { openModal } from '$lib/components/Modal/modal.svelte';
 	import { showToast } from '$lib/components/Toast/toastStore.svelte';
+	import { openModal } from '$lib/components/Modal/modalStore.svelte';
 
 	let { me, user, isProfile }: { me: BetterAuthUser; user: BetterAuthUser; isProfile: boolean } =
 		$props();

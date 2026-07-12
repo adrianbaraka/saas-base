@@ -56,7 +56,7 @@
 			{@render field('Ban reason', user.banReason ?? '—')}
 			{@render field(
 				'Ban expires',
-				`${new Date(user.banExpires).toDateString()} at ${new Date(user.banExpires).toLocaleTimeString()}`,
+				`${new Date(user.banExpires).toDateString()} at ${new Date(user.banExpires).toLocaleTimeString()}`
 			)}
 		{/if}
 
