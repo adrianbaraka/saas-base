@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/require-await */
 import { t, Static } from "elysia";
 import { User } from "@lib/auth";
-import { assertPermission } from "@lib/permissions";
-import {status } from "elysia"
+import { assertPermission } from "@lib/permissions/helpers";
 
 /////////////////////////////////////////////////////
 // Schemas + inferred types
@@ -28,9 +27,7 @@ export async function handleNoInput() {
 }
 
 export async function handleWithParams(id: string, user: User) {
-	const err = await assertPermission(user.id, { user: ["list"] });
-	if (err) return status(403, { error: err.message });
-
+	await assertPermission(user.id, { user: ["list"] });
 	return { id };
 }
 

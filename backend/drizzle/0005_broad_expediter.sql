@@ -1,0 +1,2 @@
+ALTER TABLE "user" ALTER COLUMN "tenant_id" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "user" ADD CONSTRAINT "user_tenant_id_tenant_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenant"("id") ON DELETE restrict ON UPDATE no action;

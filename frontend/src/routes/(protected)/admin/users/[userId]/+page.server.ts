@@ -57,5 +57,5 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const rolesData: Role[] | null =
 		rolesRes.status === 'fulfilled' && rolesRes.value.ok ? await rolesRes.value.json() : null;
 
-	return { user, sessionData: sessionData, me: locals.session, rolesData: rolesData };
+	return { user: user, sessionData: sessionData, me: locals.session, rolesData: rolesData };
 };

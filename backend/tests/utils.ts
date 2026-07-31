@@ -13,14 +13,14 @@ export function mockUser({
 } = {}) {
 	if (!isAuthenticated) {
 		return mock.module("@lib/auth", () => ({
-			auth: { api: { getSession: async () => null } },
+			auth: { api: { getSession: () => null } },
 		}));
 	}
 
 	return mock.module("@lib/auth", () => ({
 		auth: {
 			api: {
-				getSession: async () => ({
+				getSession: () => ({
 					user: {
 						id,
 						roles,

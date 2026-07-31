@@ -15,6 +15,7 @@
 	let sessions = $derived(data.sessionData?.sessions);
 
 	let isProfile = $derived(data.me?.user.id === data.user.id);
+	
 </script>
 
 {#if data.me}

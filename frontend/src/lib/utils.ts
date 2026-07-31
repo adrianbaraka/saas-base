@@ -28,7 +28,7 @@ export async function welcomeEmailSend({ email, me }: { email: string; me: Bette
 
 		if (!res.ok) {
 			const e: ErrorResponse = await res.json();
-			showToast(e.error, 'error');
+			showToast(e.message, 'error');
 			return;
 		}
 		showToast(`Email sent to ${email}`, 'success');

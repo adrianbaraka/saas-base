@@ -37,7 +37,7 @@
 			});
 			e = error;
 		} else {
-			console.log('here');
+			//console.log('here');
 
 			return; // shouldn't be reachable
 		}

@@ -7,10 +7,13 @@
 		"betterAuth:generate": "bun x auth@latest generate --output src/lib/db/schema",
 		"db:generate": "bunx drizzle-kit generate",
 		"db:migrate": "bunx drizzle-kit migrate",
-		"db:ui": "bun x drizzle-kit studio"
+		"db:ui": "bun x drizzle-kit studio",
+		"seed-demo": "bun run scripts/demoSeed.ts",
+		"lint": "bunx eslint ."
 	},
 	"dependencies": {
 		"@elysia/openapi": "^1.4.15",
+		"@faker-js/faker": "^10.5.0",
 		"better-auth": "^1.6.20",
 		"dotenv": "^17.4.2",
 		"drizzle-orm": "^0.45.2",

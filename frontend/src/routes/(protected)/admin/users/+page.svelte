@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
 	import Appbar from '$lib/components/Layout/Appbar.svelte';
+	import Pagination from '$lib/components/Table/Pagination.svelte';
+	import SortableHeader from '$lib/components/Table/SortableHeader.svelte';
 	import type { PageProps } from './$types';
 	import SearchIcon from '@iconify-svelte/material-symbols/search';
 	import CheckIcon from '@iconify-svelte/material-symbols/check';
@@ -11,126 +11,55 @@
 	import MarkEmailUnreadIcon from '@iconify-svelte/material-symbols/mark-email-unread';
 	import AdminPanelSettingsIcon from '@iconify-svelte/material-symbols/admin-panel-settings';
 	import { isEffectivelyBanned } from '$lib/utils';
+	import { TableUrlState } from '$lib/components/Table/tableUrlState.svelte';
+
 	let { data }: PageProps = $props();
-	let search = $derived(data.search);
-	let limit = $derived(data.limit);
 
-	const totalPages = $derived(Math.ceil(data.total / data.limit));
-	const currentPage = $derived(Math.floor(data.offset / data.limit) + 1);
+	const table = $derived(new TableUrlState(data));
 
-	function goToPage(p: number) {
-		const params = new URLSearchParams(page.url.searchParams); // ← no $
-		params.set('offset', String((p - 1) * data.limit));
-		goto(`?${params}`);
-	}
+	$effect(() => {
+		table.sync(data);
+	});
 
-	function onSearch() {
-		const params = new URLSearchParams(page.url.searchParams);
-		params.set('search', search);
-		params.set('offset', '0');
-		goto(`?${params}`);
-	}
+	const totalPages = $derived(Math.ceil(data.total / table.limit));
+	const currentPage = $derived(Math.floor(data.offset / table.limit) + 1);
 
-	function onLimitChange() {
-		const params = new URLSearchParams(page.url.searchParams);
-		params.set('limit', String(limit));
-		params.set('offset', '0'); // reset to first page
-		goto(`?${params}`);
-	}
-
-	function toggleSort(col: string) {
-		const params = new URLSearchParams(page.url.searchParams); // ← no $
-		const currentSort = params.get('sortBy');
-		const currentDir = params.get('sortDirection') ?? 'desc';
-		params.set('sortBy', col);
-		params.set('sortDirection', currentSort === col && currentDir === 'asc' ? 'desc' : 'asc');
-		params.set('offset', '0');
-		goto(`?${params}`);
-	}
-
-	function arrow(col: string) {
-		if (data.sortBy !== col) return '↕';
-		return data.sortDirection === 'asc' ? '↑' : '↓';
-	}
-
-	// stats
+	// prettier-ignore
 	function stats() {
 		return [
-			{
-				title: 'Total Users',
-				value: `${data.stats.totalUsers}`,
-				desc: 'Registered accounts',
-				color: '',
-				Icon: GroupIcon
-			},
-			{
-				title: 'Admin Users',
-				value: `${data.stats.adminUsers}`,
-				desc: 'Assigned admin role',
-				color: 'text-success',
-				Icon: AdminPanelSettingsIcon
-			},
-			{
-				title: 'Unverified Users',
-				value: `${data.stats.unverifiedUsers}`,
-				desc: 'Email not verified',
-				color: 'text-warning',
-				Icon: MarkEmailUnreadIcon
-			},
-			{
-				title: 'Banned Users',
-				value: `${data.stats.bannedUsers}`,
-				desc: 'Currently banned',
-				color: 'text-red-700',
-				Icon: BlockIcon
-			}
+			{ title: 'Total Users', value: `${data.stats.totalUsers}`, desc: 'Registered accounts', color: '', Icon: GroupIcon },
+			{ title: 'Admin Users', value: `${data.stats.adminUsers}`, desc: 'Assigned admin role', color: 'text-success', Icon: AdminPanelSettingsIcon },
+			{ title: 'Unverified Users', value: `${data.stats.unverifiedUsers}`, desc: 'Email not verified', color: 'text-warning', Icon: MarkEmailUnreadIcon },
+			{ title: 'Banned Users', value: `${data.stats.bannedUsers}`, desc: 'Currently banned', color: 'text-red-700', Icon: BlockIcon }
 		];
 	}
 </script>
 
-<Appbar user={data.me} title="Manage Users" description="View and Manage all users in the system.">
+<Appbar user={data.me} title="Manage Users" description="View and Manage all users in the organisation.">
 	<div class="flex flex-wrap pb-5 gap-10 items-center justify-center">
 		{#each stats() as stat}
-			<StatCard
-				title={stat.title}
-				value={stat.value}
-				desc={stat.desc}
-				color={stat.color}
-				Icon={stat.Icon}
-			/>
+			<StatCard title={stat.title} value={stat.value} desc={stat.desc} color={stat.color} Icon={stat.Icon} />
 		{/each}
 	</div>
-	<div class="">
+
+	<div>
 		<h2 class="text-2xl font-bold mb-5">Users</h2>
 
 		<div class="flex flex-col gap-4">
-			<!-- Search -->
 			<div class="flex justify-end">
 				<label class="input input-bordered">
-					<input
-						placeholder="Search by email..."
-						bind:value={search}
-						onkeydown={(e) => e.key === 'Enter' && onSearch()}
-						class="grow"
-					/>
-					<button
-						onclick={onSearch}
-						aria-label="Search"
-						class="opacity-60 hover:opacity-100 cursor-pointer"
-					>
-						<SearchIcon height="16" />
-					</button>
+					<input placeholder="Search by name/email..." bind:value={table.search} class="grow" />
+					<SearchIcon height="16" class="opacity-60" />
 				</label>
 			</div>
-			<!-- items per page -->
+
 			<div class="flex items-center gap-2">
 				<label for="items" class="text-sm">Items per page:</label>
 				<select
 					id="items"
-					name="items"
 					class="select select-bordered w-16 select-sm"
-					bind:value={limit}
-					onchange={onLimitChange}
+					bind:value={table.limit}
+					onchange={() => table.changeLimit(table.limit)}
 				>
 					<option value={5}>5</option>
 					<option value={20}>20</option>
@@ -139,68 +68,31 @@
 				</select>
 			</div>
 
-			<!-- Table -->
 			<div class="overflow-x-auto">
 				<table class="table table-zebra table-pin-rows">
 					<thead>
 						<tr>
-							<th class="cursor-pointer select-none" onclick={() => toggleSort('name')}>
-								Name {arrow('name')}
-							</th>
-							<th class="cursor-pointer select-none" onclick={() => toggleSort('email')}>
-								Email {arrow('email')}
-							</th>
-							<th class="cursor-pointer select-none" onclick={() => toggleSort('emailVerified')}>
-								Email Status {arrow('emailVerified')}
-							</th>
-							<th class="cursor-pointer select-none" onclick={() => toggleSort('role')}>
-								Role {arrow('role')}
-							</th>
-							<th class="cursor-pointer select-none" onclick={() => toggleSort('createdAt')}>
-								Created {arrow('createdAt')}
-							</th>
-							<th class="cursor-pointer select-none" onclick={() => toggleSort('banned')}
-								>Account Status {arrow('banned')}</th
-							>
+							<SortableHeader column="name" {table}>Name</SortableHeader>
+							<SortableHeader column="email" {table}>Email</SortableHeader>
+							<SortableHeader column="emailVerified" {table}>Email Status</SortableHeader>
+							<SortableHeader column="role" {table}>Role</SortableHeader>
+							<SortableHeader column="createdAt" {table}>Created</SortableHeader>
+							<SortableHeader column="banned" {table}>Account Status</SortableHeader>
 						</tr>
 					</thead>
 					<tbody>
 						{#each data.users as user}
-							<!-- repetitive a link but the only way  -->
 							<tr class="hover:bg-base-300">
-								<td class="p-0">
-									<a href={`/admin/users/${user.id}`} class="flex px-4 py-2">{user.name}</a>
-								</td>
-								<td class="p-0">
-									<a href={`/admin/users/${user.id}`} class="flex px-4 py-2">{user.email}</a>
-								</td>
+								<td class="p-0"><a href={`/admin/users/${user.id}`} class="flex px-4 py-2">{user.name}</a></td>
+								<td class="p-0"><a href={`/admin/users/${user.id}`} class="flex px-4 py-2">{user.email}</a></td>
 								<td class="p-0">
 									<a href={`/admin/users/${user.id}`} class="flex px-4 py-2">
 										{#if user.emailVerified}
-											<span class="badge text-blue-800 dark:badge-primary badge-soft badge-sm"
-												><CheckIcon height="16" />Verified</span
-											>
+											<span class="badge text-blue-800 dark:badge-primary badge-soft badge-sm">
+												<CheckIcon height="16" />Verified
+											</span>
 										{:else}
-											<span class="badge badge-warning badge-soft badge-sm">
-												<svg
-													xmlns="http://www.w3.org/2000/svg"
-													width="16"
-													height="16"
-													viewBox="0 0 24 24"
-												>
-													<path d="M0 0h24v24H0z" fill="none" />
-													<path
-														fill="none"
-														stroke="currentColor"
-														stroke-linecap="round"
-														stroke-linejoin="round"
-														stroke-width="2"
-														d="M12 6V3m0 18v-2m7-7h2M3 12h3m11.657-5.657l.707-.707M5.636 18.364L7.05 16.95m9.9 0l1.414 1.414M5.636 5.636l2.121 2.121"
-													/>
-												</svg>
-
-												Unverified</span
-											>
+											<span class="badge badge-warning badge-soft badge-sm">Unverified</span>
 										{/if}
 									</a>
 								</td>
@@ -225,79 +117,16 @@
 								</td>
 							</tr>
 						{:else}
-							<tr>
-								<td colspan={6} class="text-center py-6">No users found.</td>
-							</tr>
+							<tr><td colspan={6} class="text-center py-6">No users found.</td></tr>
 						{/each}
 					</tbody>
 				</table>
 			</div>
 
-			<!-- Pagination -->
 			<div class="flex items-center gap-4">
-				<div class="join">
-					<!-- Go back -->
-					<button
-						class="join-item btn btn-sm"
-						disabled={currentPage === 1}
-						onclick={() => goToPage(currentPage - 1)}
-					>
-						«
-					</button>
-
-					{#if totalPages <= 7}
-						{#each Array.from({ length: totalPages }, (_, i) => i + 1) as p}
-							<button
-								class="join-item btn btn-sm {p === currentPage ? 'btn-active' : ''}"
-								onclick={() => goToPage(p)}
-							>
-								{p}
-							</button>
-						{/each}
-					{:else}
-						<button
-							class="join-item btn btn-sm {currentPage === 1 ? 'btn-active' : ''}"
-							onclick={() => goToPage(1)}
-						>
-							1
-						</button>
-
-						{#if currentPage > 3}
-							<button class="join-item btn btn-sm btn-disabled">...</button>
-						{/if}
-
-						{#each Array.from({ length: totalPages }, (_, i) => i + 1).filter((p) => p > 1 && p < totalPages && Math.abs(p - currentPage) <= 1) as p}
-							<button
-								class="join-item btn btn-sm {p === currentPage ? 'btn-active' : ''}"
-								onclick={() => goToPage(p)}
-							>
-								{p}
-							</button>
-						{/each}
-
-						{#if currentPage < totalPages - 2}
-							<button class="join-item btn btn-sm btn-disabled">...</button>
-						{/if}
-						<!-- last page -->
-						<button
-							class="join-item btn btn-sm {currentPage === totalPages ? 'btn-active' : ''}"
-							onclick={() => goToPage(totalPages)}
-						>
-							{totalPages}
-						</button>
-					{/if}
-					<!-- next page -->
-					<button
-						class="join-item btn btn-sm"
-						disabled={currentPage === totalPages}
-						onclick={() => goToPage(currentPage + 1)}
-					>
-						»
-					</button>
-				</div>
-
+				<Pagination {currentPage} {totalPages} onPageChange={(p) => table.goToPage(p)} />
 				<span class="text-sm text-gray-500">
-					{data.offset + 1}–{Math.min(data.offset + data.limit, data.total)} of {data.total} users
+					{data.offset + 1}–{Math.min(data.offset + table.limit, data.total)} of {data.total} users
 				</span>
 			</div>
 		</div>

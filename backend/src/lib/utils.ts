@@ -4,8 +4,8 @@ import { db } from "./db";
 import { user } from "./db/schema/auth-schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
-import { sendWelcomeEmail } from "@routes/v1/users/users.handlers";
 import { env } from "./env";
+import { handleSendWelcomeEmail } from "@routes/v1/users/users.handlers";
 
 /**
  * Asserts that a value is neither null nor undefined.
@@ -35,9 +35,9 @@ export async function runMigrations() {
 // create a default admin account if not exist
 export async function defaultAdmin() {
 	// check if an admin exists
-	const res = await db.$count(user, eq(user.role, "admin"));
+	const res = await db.$count(user, eq(user.role, "platformAdmin"));
 	if (res > 0) {
-		console.log("An admin account already exists.");
+		console.log("A platform admin account already exists.");
 		return;
 	}
 
@@ -49,20 +49,26 @@ export async function defaultAdmin() {
 			name: env.DEFAULT_ADMIN_NAME,
 			email: env.DEFAULT_ADMIN_EMAIL,
 			emailVerified: false,
-			role: "admin",
+			role: "platformAdmin",
 		})
 		.returning();
 
 	if (!created) {
-		console.error("An error occurred creating the default admin user.");
+		console.error(
+			"An error occurred creating the default platform admin user.",
+		);
 		process.exit(1);
 	}
 	const redirectTo = `${env.BETTER_AUTH_URL}/welcome`;
 	try {
-		await sendWelcomeEmail(created.id, created.email, redirectTo);
-		console.log("Default admin account created successfully");
+		await handleSendWelcomeEmail(created, created.email, redirectTo);
+		console.log("Default platform admin account created successfully");
 	} catch (error) {
 		console.error(error);
 		process.exit(1);
 	}
+}
+
+export function escapeLikePattern(value: string): string {
+	return value.replace(/[\\%_]/g, "\\$&");
 }

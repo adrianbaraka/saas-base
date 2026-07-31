@@ -29,7 +29,9 @@ export default defineConfig([
 			"@typescript-eslint/switch-exhaustiveness-check": "error", // unhandled enum cases
 
 			// data integrity
-			"@typescript-eslint/no-non-null-assertion": "error", // forbids the ! operator
+			"@typescript-eslint/no-non-null-assertion": "error", // forbids the ! operator,
+
+			"@typescript-eslint/only-throw-error": "error",
 		},
 	},
 ]);

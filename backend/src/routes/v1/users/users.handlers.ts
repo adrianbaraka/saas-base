@@ -1,10 +1,3 @@
-import { status } from "elysia";
-import {
-	assertPermission,
-	roles,
-	roleDescriptions,
-	modules,
-} from "@lib/permissions";
 import { User } from "@lib/auth";
 import { sql, eq } from "drizzle-orm";
 import { db } from "@lib/db";
@@ -15,27 +8,54 @@ import {
 import { nanoid } from "nanoid";
 import { welcomeEmail } from "@lib/email";
 import { env } from "@lib/env";
+import { assertPermission, hasPermission } from "@lib/permissions/helpers";
+import {
+	roleDescriptions,
+	fullRoles,
+	tenantRoles,
+	fullModules,
+	tenantModules,
+} from "@lib/permissions/roles";
+import { ApiError, ForbiddenError } from "@lib/errors";
 
+// if the user has list-full return all roles if just list return tenant scoped roles
 export async function handleGetRoles(user: User) {
-	const err = await assertPermission(user.id, { roles: ["list"] });
-	if (err) return status(403, { error: err.message });
+	const canListFull = await hasPermission(user.id, { roles: ["list-full"] });
 
-	return Object.keys(roles).map((roleName) => ({
+	if (!canListFull) {
+		await assertPermission(user.id, { roles: ["list"] });
+	}
+
+	const roleSet = canListFull ? fullRoles : tenantRoles;
+
+	return Object.keys(roleSet).map((roleName) => ({
 		name: roleName,
-		description: roleDescriptions[roleName as keyof typeof roles],
+		description: roleDescriptions[roleName as keyof typeof fullRoles],
 	}));
 }
 
+// same as above split based on full
 export async function handleGetRolesFull(user: User) {
-	const err = await assertPermission(user.id, { roles: ["list"] });
-	if (err) return status(403, { error: err.message });
+	const canListFull = await hasPermission(user.id, {
+		roles: ["list-full"],
+	});
+
+	if (!canListFull) {
+		await assertPermission(user.id, {
+			roles: ["list"],
+		});
+	}
+
+	const [moduleSet, roleSet] = canListFull
+		? [fullModules, fullRoles]
+		: [tenantModules, tenantRoles];
 
 	return {
-		modules: Object.entries(modules).map(([moduleName, actions]) => ({
+		modules: Object.entries(moduleSet).map(([moduleName, actions]) => ({
 			module: moduleName,
 			actions: [...actions],
 		})),
-		roles: Object.entries(roles).map(([roleName, role]) => ({
+		roles: Object.entries(roleSet).map(([roleName, role]) => ({
 			role: roleName,
 			permissions: role.statements as Record<string, string[]>,
 		})),
@@ -43,8 +63,9 @@ export async function handleGetRolesFull(user: User) {
 }
 
 export async function getUserStats(user: User) {
-	const err = await assertPermission(user.id, { user: ["list"] });
-	if (err) return status(403, { error: err.message });
+	await assertPermission(user.id, { user: ["list"] });
+
+	if (!user.tenantId) throw new ForbiddenError();
 
 	const [stats] = await db
 		.select({
@@ -56,40 +77,22 @@ export async function getUserStats(user: User) {
 			unverifiedUsers: sql<number>`count(*) filter (where ${authSchemaUser.emailVerified} = false)::int`,
 			adminUsers: sql<number>`count(*) filter (where ${authSchemaUser.role} = 'admin')::int`,
 		})
-		.from(authSchemaUser);
+		.from(authSchemaUser)
+		// tenant id check
+		.where(eq(authSchemaUser.tenantId, user.tenantId));
 
-	if (stats) {
-		return stats;
-	}
-
-	return status(404, { error: "Not found" });
+	return (
+		stats ?? {
+			totalUsers: 0,
+			bannedUsers: 0,
+			unverifiedUsers: 0,
+			adminUsers: 0,
+		}
+	);
 }
 
-export class WelcomeEmailError extends Error {
-	constructor(
-		message: string,
-		public code:
-			| "FORBIDDEN"
-			| "INVALID_REDIRECT"
-			| "USER_NOT_FOUND"
-			| "ALREADY_VERIFIED"
-			| "RATE_LIMITED",
-	) {
-		super(message);
-		this.name = "WelcomeEmailError";
-	}
-}
-
-const ERROR_STATUS: Record<WelcomeEmailError["code"], number> = {
-	FORBIDDEN: 403,
-	INVALID_REDIRECT: 400,
-	USER_NOT_FOUND: 404,
-	ALREADY_VERIFIED: 400,
-	RATE_LIMITED: 429,
-};
-
-export async function sendWelcomeEmail(
-	actingUserId: string,
+export async function handleSendWelcomeEmail(
+	actingUser: User,
 	email: string,
 	redirectTo: string,
 ) {
@@ -97,20 +100,17 @@ export async function sendWelcomeEmail(
 	const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 	const RESEND_COOLDOWN_MS = 5 * 60 * 1000; // preventing spamming for 5min
 
-	const err = await assertPermission(actingUserId, { user: ["create"] });
-	if (err) throw new WelcomeEmailError(err.message, "FORBIDDEN");
+	await assertPermission(actingUser.id, { user: ["create"] });
 
 	let redirectOrigin: string;
 	try {
 		redirectOrigin = new URL(redirectTo).origin;
 	} catch {
-		throw new WelcomeEmailError("Invalid redirectTo", "INVALID_REDIRECT");
+		throw new ApiError(400, "Invalid redirectTo");
 	}
+	// TODO allow passing relative links eg /welcome
 	if (!ALLOWED_ORIGINS.includes(redirectOrigin)) {
-		throw new WelcomeEmailError(
-			"redirectTo origin not allowed",
-			"INVALID_REDIRECT",
-		);
+		throw new ApiError(400, "redirectTo origin not allowed");
 	}
 
 	const [invitee] = await db
@@ -119,23 +119,28 @@ export async function sendWelcomeEmail(
 		.where(eq(authSchemaUser.email, email))
 		.limit(1);
 
-	if (!invitee)
-		throw new WelcomeEmailError("User not found", "USER_NOT_FOUND");
+	if (!invitee) throw new ApiError(404, "User not found");
 	if (invitee.emailVerified) {
-		throw new WelcomeEmailError(
-			"User has already completed setup",
-			"ALREADY_VERIFIED",
-		);
+		throw new ApiError(400, "User has already completed setup");
 	}
 
 	if (
 		invitee.welcomeEmailSentAt &&
 		Date.now() - invitee.welcomeEmailSentAt.getTime() < RESEND_COOLDOWN_MS
 	) {
-		throw new WelcomeEmailError(
-			"Invite recently sent, try again shortly",
-			"RATE_LIMITED",
-		);
+		throw new ApiError(409, "Invite recently sent, try again shortly");
+	}
+
+	// ensure tenancy integrity
+	if (invitee.tenantId) {
+		if (actingUser.tenantId !== invitee.tenantId) {
+			throw new ApiError(404, "User not found");
+		}
+	} else {
+		// ensure that if the user has no tenant id its a platform admin inviting another platform admin
+		await assertPermission(actingUser.id, {
+			tenants: ["create"],
+		});
 	}
 
 	const token = nanoid(32);
@@ -155,21 +160,8 @@ export async function sendWelcomeEmail(
 		.update(authSchemaUser)
 		.set({ welcomeEmailSentAt: new Date() })
 		.where(eq(authSchemaUser.id, invitee.id));
-}
 
-// Route handler — the only place that knows about HTTP status codes
-export async function handleSendWelcomeEmail(
-	user: User,
-	email: string,
-	redirectTo: string,
-) {
-	try {
-		await sendWelcomeEmail(user.id, email, redirectTo);
-		return status(202, { success: true });
-	} catch (e) {
-		if (e instanceof WelcomeEmailError) {
-			return status(ERROR_STATUS[e.code], { error: e.message });
-		}
-		throw e; // unexpected error
-	}
+	return {
+		success: "true",
+	};
 }

@@ -3,6 +3,7 @@ routeRoles.set('/(protected)/admin', 'admin');
 
 // prefix for routes based on role
 const rolePrefixList: Record<string, string> = {
+	platformAdmin: '/platform-admin',
 	admin: '/admin',
 	default: '/user'
 };

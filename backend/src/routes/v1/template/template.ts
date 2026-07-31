@@ -9,7 +9,8 @@ import {
 	WithQuerySchema,
 	WithBodySchema,
 } from "./template.handlers";
-import { authMacro, prettyPrintPermission } from "@lib/permissions";
+import { authMacro, prettyPrintPermission } from "@lib/permissions/helpers"
+
 
 /////////////////////////////////////////////////////
 // Routes

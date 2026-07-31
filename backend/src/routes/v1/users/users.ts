@@ -1,12 +1,12 @@
 import Elysia, { t } from "elysia";
 import { ErrorResponse } from "@lib/interfaces";
-import { authMacro, prettyPrintPermission } from "@lib/permissions";
 import {
 	getUserStats,
 	handleGetRoles,
 	handleGetRolesFull,
 	handleSendWelcomeEmail,
 } from "./users.handlers";
+import { authMacro, prettyPrintPermission } from "@lib/permissions/helpers";
 
 /////////////////////////////////////////////////////
 // Routes

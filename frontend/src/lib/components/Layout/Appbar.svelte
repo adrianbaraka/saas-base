@@ -52,8 +52,8 @@
 				<div class="text-sm italic">{description}</div>
 			</div>
 		</div>
-		<div class="flex-none">
-			<div class="dropdown dropdown-end">
+		<div class="flex-none" >
+			<div class="dropdown dropdown-end"  id="appbar">
 				<div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
 					{#if user?.image}
 						<div class="w-10 rounded-full">

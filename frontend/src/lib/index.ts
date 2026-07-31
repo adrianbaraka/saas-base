@@ -35,7 +35,7 @@ export type IconComponent = new (...args: any[]) => any;
 export type ToastType = 'error' | 'warning' | 'success';
 
 export interface ErrorResponse {
-	error: string;
+	message: string;
 }
 
 export interface SideLink {
@@ -43,4 +43,20 @@ export interface SideLink {
 	name: string;
 	icon: IconComponent;
 	children?: SideLink[];
+}
+
+export interface req {
+	id: string;
+	requestedBy: string;
+	name: string;
+	status: string;
+	createdAt: string;
+	updatedAt: string;
+	reviewedBy: string | null;
+	reviewedAt: string | null;
+	rejectionReason: string | null;
+}
+
+export interface reqRes {
+	request: req;
 }

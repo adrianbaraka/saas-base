@@ -17,6 +17,11 @@ export const authClient = createAuthClient({
 					type: 'date',
 					required: false,
 					input: false
+				},
+				tenantId: {
+					type: 'string',
+					required: false,
+					input: false
 				}
 			}
 		})

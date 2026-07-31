@@ -6,7 +6,6 @@ import * as authSchema from "@lib/db/schema/auth-schema";
 import { db } from "@lib/db";
 import Elysia from "elysia";
 import openapi from "@elysia/openapi";
-import { ac, admin, user } from "./permissions";
 import { markEmailVerified } from "./db/queries";
 import {
 	existingSignUpEmail,
@@ -14,18 +13,38 @@ import {
 	verificationEmail,
 } from "./email";
 import { env } from "./env";
+import { ac, fullRoles } from "./permissions/roles";
 
 const AUTH_BASE_PATH = "/api/auth";
+const cacheAge = Number(env.CACHE_MINUTES) * 60;
 
 // better auth object
 export const auth = betterAuth({
-	// session: {
-	// 	cookieCache: {
-	// 		enabled: true,
-	// 		maxAge: 2 * 60, // Cache duration in seconds
-	// 	},
-	// },
+	session: {
+		cookieCache: {
+			enabled: true,
+			maxAge: cacheAge, // Cache duration in seconds
+		},
+	},
 	trustedOrigins: [env.BETTER_AUTH_URL, "http://localhost:8000"],
+	// block the admin routes only expose the custom routes for multitenancy
+	disabledPaths: [
+		//"/sign-up/email",
+		"/admin/set-role",
+		"/admin/get-user",
+		"/admin/create-user",
+		"/admin/update-user",
+		"/admin/list-users",
+		"/admin/list-user-sessions",
+		"/admin/unban-user",
+		"/admin/ban-user",
+		"/admin/impersonate-user",
+		"/admin/stop-impersonating",
+		"/admin/revoke-user-session",
+		"/admin/revoke-user-sessions",
+		"/admin/remove-user",
+		"/admin/set-user-password",
+	],
 	advanced: {
 		ipAddress: {
 			ipAddressHeaders: ["x-forwarded-for"],
@@ -39,6 +58,11 @@ export const auth = betterAuth({
 		additionalFields: {
 			welcomeEmailSentAt: {
 				type: "date",
+				required: false,
+				input: false,
+			},
+			tenantId: {
+				type: "string",
 				required: false,
 				input: false,
 			},
@@ -72,10 +96,7 @@ export const auth = betterAuth({
 		openAPI(),
 		adminPlugin({
 			ac,
-			roles: {
-				admin,
-				user,
-			},
+			roles: fullRoles,
 		}),
 	],
 });
@@ -138,5 +159,3 @@ export const Docs = new Elysia({ name: "docs" }).use(
 		},
 	}),
 );
-
-
