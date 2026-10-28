@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { SideLink } from '$lib';
-	import Sidebar from '$lib/components/Layout/Sidebar.svelte';
+	import type { SideLink } from '#lib';
+	import Sidebar from '#lib/components/Layout/Sidebar.svelte';
 	import DashboardIcon from '@iconify-svelte/material-symbols/dashboard';
 	import SettingsIcon from '@iconify-svelte/material-symbols/settings';
 

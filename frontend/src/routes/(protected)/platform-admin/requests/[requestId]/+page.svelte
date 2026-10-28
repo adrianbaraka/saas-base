@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Appbar from '$lib/components/Layout/Appbar.svelte';
-	import AcceptTenancy from '$lib/components/Profile/actions/AcceptTenancy.svelte';
-	import RejectTenancy from '$lib/components/Profile/actions/RejectTenancy.svelte';
-	import Section from '$lib/components/Section.svelte';
+	import Appbar from '#lib/components/Layout/Appbar.svelte';
+	import AcceptTenancy from '#lib/components/Profile/actions/AcceptTenancy.svelte';
+	import RejectTenancy from '#lib/components/Profile/actions/RejectTenancy.svelte';
+	import Section from '#lib/components/Section.svelte';
 	let { data } = $props();
 
 	function formatDate(value: string | null) {

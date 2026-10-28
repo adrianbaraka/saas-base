@@ -3,9 +3,9 @@
 	import VisibilityIcon from '@iconify-svelte/material-symbols/visibility';
 	import VisibilityOffIcon from '@iconify-svelte/material-symbols/visibility-off';
 	import KeyIcon from '@iconify-svelte/material-symbols/key';
-	import { authClient } from '$lib/auth-client'; // adjust path as needed
+	import { authClient } from '#lib/auth-client.js'; // adjust path as needed
 	import { showToast } from '../../Toast/toastStore.svelte';
-	import { cancelModal, openModal } from '$lib/components/Modal/modalStore.svelte';
+	import { cancelModal, openModal } from '#lib/components/Modal/modalStore.svelte.js';
 
 	let formEl: HTMLFormElement;
 

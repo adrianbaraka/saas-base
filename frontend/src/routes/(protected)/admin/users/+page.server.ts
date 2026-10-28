@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import type { BetterAuthUser } from '$lib';
+import type { BetterAuthUser } from '#lib';
 
 export interface ListUsersResponse {
 	users: BetterAuthUser[];

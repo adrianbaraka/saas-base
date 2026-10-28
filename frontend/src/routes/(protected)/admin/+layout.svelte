@@ -5,8 +5,8 @@
 	import PersonIcon from '@iconify-svelte/material-symbols/person';
 	import SettingsIcon from '@iconify-svelte/material-symbols/settings';
 	import PersonAddIcon from '@iconify-svelte/material-symbols/person-add';
-	import Sidebar from '$lib/components/Layout/Sidebar.svelte';
-	import type { SideLink } from '$lib';
+	import Sidebar from '#lib/components/Layout/Sidebar.svelte';
+	import type { SideLink } from '#lib';
 
 	const links: SideLink[] = [
 		{ href: '/admin/dashboard', name: 'Dashboard', icon: DashboardIcon },

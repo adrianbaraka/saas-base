@@ -1,10 +1,10 @@
 <script lang="ts">
 	import CheckIcon from '@iconify-svelte/material-symbols/check-circle';
 
-	import { openModal } from '$lib/components/Modal/modalStore.svelte';
-	import type { req } from '$lib';
-	import { showToast } from '$lib/components/Toast/toastStore.svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { openModal } from '#lib/components/Modal/modalStore.svelte.js';
+	import type { req } from '#lib';
+	import { showToast } from '#lib/components/Toast/toastStore.svelte.js';
+	import { refreshAll } from '$app/navigation';
 
 	let { request }: { request: req } = $props();
 
@@ -26,7 +26,7 @@
 				throw new Error('An error occurred accepting the request.');
 			}
 			showToast('SuccessFully accepted the tenancy request.', 'success');
-			await invalidateAll();
+			await refreshAll();
 		} catch (error) {
 			showToast('An error occurred.', 'error');
 			console.error(error);
@@ -37,13 +37,12 @@
 
 <button
 	class="btn btn-success rounded-2xl flex flex-row gap-2"
-	disabled={accepting || request.status !== "pending"}
+	disabled={accepting || request.status !== 'pending'}
 	onclick={acceptRequest}
 >
 	<span>Approve Request</span>
 	<CheckIcon height="24" />
 </button>
-
 
 {#snippet ConfirmAccept({ confirm, cancel }: { confirm: () => void; cancel: () => void })}
 	<div class="">

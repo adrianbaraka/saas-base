@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Appbar from '$lib/components/Layout/Appbar.svelte';
-	import StatCard from '$lib/components/StatCard.svelte';
+	import Appbar from '#lib/components/Layout/Appbar.svelte';
+	import StatCard from '#lib/components/StatCard.svelte';
 	import type { PageData } from './$types';
 	import KeyboardArrowRightIcon from '@iconify-svelte/material-symbols/keyboard-arrow-right';
 	import ViewModuleIcon from '@iconify-svelte/material-symbols/view-module';

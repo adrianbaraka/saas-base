@@ -1,15 +1,15 @@
 <script lang="ts">
-	import Appbar from '$lib/components/Layout/Appbar.svelte';
-	import Pagination from '$lib/components/Table/Pagination.svelte';
-	import SortableHeader from '$lib/components/Table/SortableHeader.svelte';
+	import Appbar from '#lib/components/Layout/Appbar.svelte';
+	import Pagination from '#lib/components/Table/Pagination.svelte';
+	import SortableHeader from '#lib/components/Table/SortableHeader.svelte';
 	import type { PageProps } from './$types';
 	import HouseIcon from '@iconify-svelte/material-symbols/house';
 	import SearchIcon from '@iconify-svelte/material-symbols/search';
-	import StatCard from '$lib/components/StatCard.svelte';
+	import StatCard from '#lib/components/StatCard.svelte';
 	import GroupIcon from '@iconify-svelte/material-symbols/group';
 	import TenancyIcon from '@iconify-svelte/material-symbols/tenancy';
 	import PendingActionsIcon from '@iconify-svelte/material-symbols/pending-actions';
-	import { TableUrlState } from '$lib/components/Table/tableUrlState.svelte';
+	import { TableUrlState } from '#lib/components/Table/tableUrlState.svelte.js';
 
 	let { data }: PageProps = $props();
 
@@ -31,7 +31,6 @@
 			{ title: 'Pending Requests', value: `${data.stats.pendingRequests}`, desc: 'Tenant requests not reviewed', color: 'text-warning', Icon: PendingActionsIcon }
 		]
 	}
-
 </script>
 
 <Appbar

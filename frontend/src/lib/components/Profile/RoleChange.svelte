@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
-	import type { BetterAuthUser } from '$lib';
+	import { refreshAll } from '$app/navigation';
+	import type { BetterAuthUser } from '#lib';
 	import { openModal } from '../Modal/modalStore.svelte';
 	import Section from '../Section.svelte';
 	import { showToast } from '../Toast/toastStore.svelte';
@@ -62,7 +62,7 @@
 				throw new Error(body?.message ?? 'Failed to update role');
 			}
 			showToast(`Role updated to ${newRole}`, 'success');
-			await invalidateAll();
+			await refreshAll();
 		} catch (err) {
 			console.error(err);
 			selectedRole = user.role;

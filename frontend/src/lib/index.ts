@@ -1,4 +1,4 @@
-// place files you want to import through the `$lib` alias in this folder.
+// place files you want to import through the `#lib` alias in this folder.
 
 import { authClient } from './auth-client';
 export type BetterAuthUser = typeof authClient.$Infer.Session.user;

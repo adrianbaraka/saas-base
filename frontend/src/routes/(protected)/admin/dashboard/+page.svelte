@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Appbar from '$lib/components/Layout/Appbar.svelte';
-	import { openModal } from '$lib/components/Modal/modalStore.svelte';
+	import Appbar from '#lib/components/Layout/Appbar.svelte';
+	import { openModal } from '#lib/components/Modal/modalStore.svelte.js';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();

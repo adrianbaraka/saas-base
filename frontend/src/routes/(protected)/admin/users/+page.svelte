@@ -1,17 +1,17 @@
 <script lang="ts">
-	import Appbar from '$lib/components/Layout/Appbar.svelte';
-	import Pagination from '$lib/components/Table/Pagination.svelte';
-	import SortableHeader from '$lib/components/Table/SortableHeader.svelte';
+	import Appbar from '#lib/components/Layout/Appbar.svelte';
+	import Pagination from '#lib/components/Table/Pagination.svelte';
+	import SortableHeader from '#lib/components/Table/SortableHeader.svelte';
 	import type { PageProps } from './$types';
 	import SearchIcon from '@iconify-svelte/material-symbols/search';
 	import CheckIcon from '@iconify-svelte/material-symbols/check';
-	import StatCard from '$lib/components/StatCard.svelte';
+	import StatCard from '#lib/components/StatCard.svelte';
 	import GroupIcon from '@iconify-svelte/material-symbols/group';
 	import BlockIcon from '@iconify-svelte/material-symbols/block';
 	import MarkEmailUnreadIcon from '@iconify-svelte/material-symbols/mark-email-unread';
 	import AdminPanelSettingsIcon from '@iconify-svelte/material-symbols/admin-panel-settings';
-	import { isEffectivelyBanned } from '$lib/utils';
-	import { TableUrlState } from '$lib/components/Table/tableUrlState.svelte';
+	import { isEffectivelyBanned } from '#lib/utils.js';
+	import { TableUrlState } from '#lib/components/Table/tableUrlState.svelte.js';
 
 	let { data }: PageProps = $props();
 
@@ -35,10 +35,20 @@
 	}
 </script>
 
-<Appbar user={data.me} title="Manage Users" description="View and Manage all users in the organisation.">
+<Appbar
+	user={data.me}
+	title="Manage Users"
+	description="View and Manage all users in the organisation."
+>
 	<div class="flex flex-wrap pb-5 gap-10 items-center justify-center">
 		{#each stats() as stat}
-			<StatCard title={stat.title} value={stat.value} desc={stat.desc} color={stat.color} Icon={stat.Icon} />
+			<StatCard
+				title={stat.title}
+				value={stat.value}
+				desc={stat.desc}
+				color={stat.color}
+				Icon={stat.Icon}
+			/>
 		{/each}
 	</div>
 
@@ -83,8 +93,12 @@
 					<tbody>
 						{#each data.users as user}
 							<tr class="hover:bg-base-300">
-								<td class="p-0"><a href={`/admin/users/${user.id}`} class="flex px-4 py-2">{user.name}</a></td>
-								<td class="p-0"><a href={`/admin/users/${user.id}`} class="flex px-4 py-2">{user.email}</a></td>
+								<td class="p-0"
+									><a href={`/admin/users/${user.id}`} class="flex px-4 py-2">{user.name}</a></td
+								>
+								<td class="p-0"
+									><a href={`/admin/users/${user.id}`} class="flex px-4 py-2">{user.email}</a></td
+								>
 								<td class="p-0">
 									<a href={`/admin/users/${user.id}`} class="flex px-4 py-2">
 										{#if user.emailVerified}

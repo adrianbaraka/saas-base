@@ -1,10 +1,10 @@
 <script lang="ts">
 	import CloseIcon from '@iconify-svelte/material-symbols/cancel';
 
-	import { openModal } from '$lib/components/Modal/modalStore.svelte';
-	import type { req } from '$lib';
-	import { showToast } from '$lib/components/Toast/toastStore.svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { openModal } from '#lib/components/Modal/modalStore.svelte.js';
+	import type { req } from '#lib';
+	import { showToast } from '#lib/components/Toast/toastStore.svelte.js';
+	import { refreshAll } from '$app/navigation';
 
 	let { request }: { request: req } = $props();
 
@@ -35,7 +35,7 @@
 				throw new Error('An error occurred rejecting the request.');
 			}
 			showToast('Successfully rejected the tenancy request.', 'success');
-			await invalidateAll();
+			await refreshAll();
 		} catch (error) {
 			showToast('An error occurred.', 'error');
 			console.error(error);

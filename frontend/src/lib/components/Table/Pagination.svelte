@@ -19,7 +19,7 @@
 
 <div class="join">
 	<button
-		class="join-item btn btn-sm"
+		class="btn join-item btn-sm"
 		disabled={currentPage === 1}
 		onclick={() => onPageChange(currentPage - 1)}
 	>
@@ -27,9 +27,9 @@
 	</button>
 
 	{#if totalPages <= 7}
-		{#each allPages as p}
+		{#each allPages as p (p)}
 			<button
-				class="join-item btn btn-sm {p === currentPage ? 'btn-active' : ''}"
+				class="btn join-item btn-sm {p === currentPage ? 'btn-active' : ''}"
 				onclick={() => onPageChange(p)}
 			>
 				{p}
@@ -37,19 +37,19 @@
 		{/each}
 	{:else}
 		<button
-			class="join-item btn btn-sm {currentPage === 1 ? 'btn-active' : ''}"
+			class="btn join-item btn-sm {currentPage === 1 ? 'btn-active' : ''}"
 			onclick={() => onPageChange(1)}
 		>
 			1
 		</button>
 
 		{#if currentPage > 3}
-			<button class="join-item btn btn-sm btn-disabled">...</button>
+			<button class="btn btn-disabled join-item btn-sm">...</button>
 		{/if}
 
-		{#each middlePages as p}
+		{#each middlePages as p (p)}
 			<button
-				class="join-item btn btn-sm {p === currentPage ? 'btn-active' : ''}"
+				class="btn join-item btn-sm {p === currentPage ? 'btn-active' : ''}"
 				onclick={() => onPageChange(p)}
 			>
 				{p}
@@ -57,11 +57,11 @@
 		{/each}
 
 		{#if currentPage < totalPages - 2}
-			<button class="join-item btn btn-sm btn-disabled">...</button>
+			<button class="btn btn-disabled join-item btn-sm">...</button>
 		{/if}
 
 		<button
-			class="join-item btn btn-sm {currentPage === totalPages ? 'btn-active' : ''}"
+			class="btn join-item btn-sm {currentPage === totalPages ? 'btn-active' : ''}"
 			onclick={() => onPageChange(totalPages)}
 		>
 			{totalPages}
@@ -69,7 +69,7 @@
 	{/if}
 
 	<button
-		class="join-item btn btn-sm"
+		class="btn join-item btn-sm"
 		disabled={currentPage === totalPages}
 		onclick={() => onPageChange(currentPage + 1)}
 	>

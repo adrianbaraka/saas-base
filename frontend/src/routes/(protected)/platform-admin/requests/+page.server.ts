@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import type { req } from '$lib';
+import type { req } from '#lib';
 
 export interface ListReqsResponse {
 	requests: req[];
@@ -11,7 +11,7 @@ export interface ListReqsResponse {
 
 export const load: PageServerLoad = async ({ url, locals }) => {
 	const limit = Number(url.searchParams.get('limit') ?? 20);
-	const filter = url.searchParams.get('filter') ?? '';
+	const status = url.searchParams.get('status') ?? '';
 	const offset = Number(url.searchParams.get('offset') ?? 0);
 	const search = url.searchParams.get('search') ?? '';
 	const sortBy = url.searchParams.get('sortBy') ?? 'createdAt';
@@ -22,7 +22,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		offset: String(offset),
 		sortBy,
 		sortDirection,
-		...(filter && { filter }),
+		...(status && { status }),
 		...(search && { searchValue: search })
 	});
 
@@ -50,7 +50,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		total: data.total,
 		limit,
 		offset,
-		filter,
+		filters: { status },
 		search,
 		sortBy,
 		sortDirection,

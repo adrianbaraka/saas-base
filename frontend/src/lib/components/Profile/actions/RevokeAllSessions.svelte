@@ -1,10 +1,10 @@
 <script lang="ts">
 	import LogoutIcon from '@iconify-svelte/material-symbols/logout';
-	import { invalidateAll } from '$app/navigation';
-	import type { AuthError, BetterAuthUser } from '$lib';
-	import { authClient } from '$lib/auth-client';
-	import { showToast } from '$lib/components/Toast/toastStore.svelte';
-	import { openModal } from '$lib/components/Modal/modalStore.svelte';
+	import { refreshAll } from '$app/navigation';
+	import type { AuthError, BetterAuthUser } from '#lib';
+	import { authClient } from '#lib/auth-client.js';
+	import { showToast } from '#lib/components/Toast/toastStore.svelte.js';
+	import { openModal } from '#lib/components/Modal/modalStore.svelte.js';
 
 	let { me, user, isProfile }: { me: BetterAuthUser; user: BetterAuthUser; isProfile: boolean } =
 		$props();
@@ -40,7 +40,7 @@
 			showToast(e.message ?? 'An error occurred revoking all sessions', 'error');
 		} else {
 			showToast('Successfully revoked all sessions', 'success');
-			await invalidateAll();
+			await refreshAll();
 		}
 	}
 </script>

@@ -1,12 +1,12 @@
 <script lang="ts">
 	import EnableIcon from '@iconify-svelte/material-symbols/enable';
 	import BlockOutlineIcon from '@iconify-svelte/material-symbols/block-outline';
-	import { invalidateAll } from '$app/navigation';
-	import type { BetterAuthUser } from '$lib';
-	import { authClient } from '$lib/auth-client';
-	import { showToast } from '$lib/components/Toast/toastStore.svelte';
-	import { isEffectivelyBanned } from '$lib/utils';
-	import { openModal, cancelModal } from '$lib/components/Modal/modalStore.svelte';
+	import { refreshAll } from '$app/navigation';
+	import type { BetterAuthUser } from '#lib';
+	import { authClient } from '#lib/auth-client.js';
+	import { showToast } from '#lib/components/Toast/toastStore.svelte.js';
+	import { isEffectivelyBanned } from '#lib/utils.js';
+	import { openModal, cancelModal } from '#lib/components/Modal/modalStore.svelte.js';
 
 	let { user, me }: { user: BetterAuthUser; me: BetterAuthUser } = $props();
 	const myOwnPage = $derived(me.id === user.id ? true : false);
@@ -25,7 +25,7 @@
 			showToast(error.message ?? 'An error unbanning the user.', 'error');
 		} else {
 			showToast(`Successfully unbanned ${user.name}`, 'success');
-			await invalidateAll();
+			await refreshAll();
 		}
 	}
 
@@ -68,7 +68,7 @@
 			showToast(error.message ?? 'An error occurred banning the user', 'error');
 		} else {
 			showToast(`User ${user.name} banned.`, 'success');
-			await invalidateAll();
+			await refreshAll();
 		}
 	}
 </script>

@@ -5,9 +5,9 @@
 	import VisibilityIcon from '@iconify-svelte/material-symbols/visibility';
 	import VisibilityOffIcon from '@iconify-svelte/material-symbols/visibility-off';
 	import MailOutlineIcon from '@iconify-svelte/material-symbols/mail-outline';
-	import { authClient } from '$lib/auth-client';
-	import { showToast } from '$lib/components/Toast/toastStore.svelte';
-	import { rolePrefix } from '$lib/roles';
+	import { authClient } from '#lib/auth-client.js';
+	import { showToast } from '#lib/components/Toast/toastStore.svelte.js';
+	import { rolePrefix } from '#lib/roles.js';
 
 	let passwordVisible = $state(false);
 	let loading = $state(false);

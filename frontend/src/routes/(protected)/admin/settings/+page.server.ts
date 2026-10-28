@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import type { UserSessionFull } from '$lib';
+import type { UserSessionFull } from '#lib';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	let res: Response;

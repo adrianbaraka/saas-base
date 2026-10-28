@@ -1,5 +1,5 @@
-import { env } from '$env/dynamic/public';
-import type { BetterAuthUser, ErrorResponse } from '$lib';
+import { PUBLIC_FRONTEND_URL } from '$app/env/public';
+import type { BetterAuthUser, ErrorResponse } from '#lib';
 import { showToast } from './components/Toast/toastStore.svelte';
 
 export async function welcomeEmailSend({ email, me }: { email: string; me: BetterAuthUser }) {
@@ -13,10 +13,9 @@ export async function welcomeEmailSend({ email, me }: { email: string; me: Bette
 		showToast('You cannot perform this action.', 'error');
 		return;
 	}
-	const payload = {
-		email: email,
-		redirectTo: `${env.PUBLIC_FRONTEND_URL}/welcome`
-	};
+
+	const payload = { email, redirectTo: `${PUBLIC_FRONTEND_URL}/welcome` };
+
 	try {
 		const res = await fetch('/api/v1/users/send-welcome', {
 			method: 'POST',
@@ -60,4 +59,12 @@ export function isEffectivelyBanned(
 	const banexp = banExpires instanceof Date ? banExpires : new Date(banExpires);
 
 	return banexp.getTime() > Date.now();
+}
+
+export function errMsg(err: unknown): string {
+	if (err instanceof Error) {
+		const { code, path } = err as { code?: string; path?: string };
+		return [code, err.message, path && `(${path})`].filter(Boolean).join(' ');
+	}
+	return String(err);
 }

@@ -1,8 +1,8 @@
 <!-- Shows user info like name email etc -->
 
 <script lang="ts">
-	import type { BetterAuthUser } from '$lib';
-	import { isEffectivelyBanned } from '$lib/utils';
+	import type { BetterAuthUser } from '#lib';
+	import { isEffectivelyBanned } from '#lib/utils.js';
 	import Section from '../Section.svelte';
 
 	let { user }: { user: BetterAuthUser } = $props();

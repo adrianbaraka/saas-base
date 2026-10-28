@@ -1,6 +1,6 @@
 <!-- UserDetailsFields.svelte -->
 <script lang="ts">
-	import type { Role } from '$lib';
+	import type { Role } from '#lib';
 
 	let { roles }: { roles: Role[] } = $props();
 	let selectedRole = $derived(roles[0].name);

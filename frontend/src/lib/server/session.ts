@@ -1,5 +1,5 @@
-import type { BetterAuthSession } from '$lib';
-import { authClient } from '$lib/auth-client';
+import type { BetterAuthSession } from '#lib';
+import { authClient } from '#lib/auth-client.js';
 import type { BackendFetchType } from './backend-fetch';
 
 type fullSession = typeof authClient.$Infer.Session;

@@ -28,7 +28,7 @@ function handleClick() {
 
 ```html
 <script lang="ts">
-	import { openModal } from '$lib/components/Modal/modal.svelte';
+	import { openModal } from '#lib/components/Modal/modal.svelte';
 
 	async function handleClick() {
 		const confirmed = await openModal({
@@ -71,7 +71,7 @@ function handleClick() {
 // +page.server.ts
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import type { UserSessionFull } from '$lib';
+import type { UserSessionFull } from '#lib';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	let res: Response;
@@ -114,7 +114,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 ```html
 <!-- +page.svelte -->
 <script lang="ts">
-	import Appbar from '$lib/components/Appbar.svelte';
+	import Appbar from '#lib/components/Appbar.svelte';
 	let { data } = $props();
 </script>
 

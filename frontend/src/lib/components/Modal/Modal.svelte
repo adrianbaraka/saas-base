@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getModal, cancelModal, confirmModal } from './modalStore.svelte';
+	import CloseIcon from '@iconify-svelte/material-symbols/close';
 
 	let dialog: HTMLDialogElement;
 
@@ -20,16 +21,20 @@
 </script>
 
 <dialog bind:this={dialog} class="modal" onclose={handleClose}>
-	<div class="modal-box">
-		<button
-			class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-			onclick={cancelModal}
-			aria-label="Close"
+	<div class="modal-box max-h-[85dvh] overflow-y-auto pt-0">
+		<div
+			class="sticky top-0 z-10 -mx-6 mb-5 flex items-center justify-between gap-2 bg-base-100 px-6 py-4"
 		>
-			✕
-		</button>
+			{#if modal?.title}
+				<h3 class="font-serif text-lg font-bold">{modal.title}</h3>
+			{:else}
+				<span></span>
+			{/if}
+			<button class="btn btn-circle btn-ghost btn-sm" onclick={cancelModal} aria-label="Close">
+				<CloseIcon height="16" />
+			</button>
+		</div>
 		{#if modal}
-			{#if modal.title}<h3 class="text-lg font-bold mb-5 font-serif">{modal.title}</h3>{/if}
 			{@render modal.content({ confirm: confirmModal, cancel: cancelModal })}
 		{/if}
 	</div>

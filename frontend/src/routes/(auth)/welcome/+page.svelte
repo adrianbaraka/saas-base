@@ -6,8 +6,8 @@
 	import VisibilityIcon from '@iconify-svelte/material-symbols/visibility';
 	import VisibilityOffIcon from '@iconify-svelte/material-symbols/visibility-off';
 
-	import { authClient } from '$lib/auth-client';
-	import { showToast } from '$lib/components/Toast/toastStore.svelte';
+	import { authClient } from '#lib/auth-client.js';
+	import { showToast } from '#lib/components/Toast/toastStore.svelte.js';
 
 	const token = $derived(page.url.searchParams.get('token'));
 	const linkError = $derived(page.url.searchParams.get('error'));

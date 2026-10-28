@@ -1,10 +1,10 @@
 <script lang="ts">
 	import UpdateIcon from '@iconify-svelte/material-symbols/update';
-	import { invalidateAll } from '$app/navigation';
-	import type { AuthError, BetterAuthUser } from '$lib';
-	import { authClient } from '$lib/auth-client';
-	import { showToast } from '$lib/components/Toast/toastStore.svelte';
-	import { openModal, cancelModal } from '$lib/components/Modal/modalStore.svelte';
+	import { refreshAll } from '$app/navigation';
+	import type { AuthError, BetterAuthUser } from '#lib';
+	import { authClient } from '#lib/auth-client.js';
+	import { showToast } from '#lib/components/Toast/toastStore.svelte.js';
+	import { openModal, cancelModal } from '#lib/components/Modal/modalStore.svelte.js';
 
 	let { me, user, isProfile }: { me: BetterAuthUser; user: BetterAuthUser; isProfile: boolean } =
 		$props();
@@ -50,7 +50,7 @@
 			showToast(e.message ?? 'An error occurred updating the user', 'error');
 		} else {
 			showToast('User details updated', 'success');
-			await invalidateAll();
+			await refreshAll();
 		}
 	}
 </script>

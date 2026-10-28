@@ -1,9 +1,10 @@
-import type { Handle, RequestEvent } from '@sveltejs/kit';
-import { error, redirect } from '@sveltejs/kit';
-import { getRequiredRole } from '$lib/roles';
-import { fetchSession } from '$lib/server/session';
-import { env } from '$env/dynamic/private';
-import { createBackendFetch } from '$lib/server/backend-fetch';
+import { type RequestEvent, error, redirect } from '@sveltejs/kit';
+import { getRequiredRole } from '#lib/roles.js';
+import { fetchSession } from '#lib/server/session.js';
+import { BACKEND_URL } from '$app/env/private';
+import { createBackendFetch } from '#lib/server/backend-fetch.js';
+import { sequence, type Handle } from '@sveltejs/kit/hooks';
+import { errMsg } from '#lib/utils.ts';
 
 async function proxyToBackend(backendUrl: URL, event: RequestEvent) {
 	backendUrl.search = event.url.search;
@@ -15,7 +16,9 @@ async function proxyToBackend(backendUrl: URL, event: RequestEvent) {
 	try {
 		return await fetch(backendRequest, { redirect: 'manual' });
 	} catch (err) {
-		console.error(`[proxy] Failed to reach backend at ${backendUrl.toString()}:`, err);
+		console.error(
+			`[proxy] Failed to reach backend at ${backendUrl.toString()}: Error: ${errMsg(err)}`
+		);
 		return new Response(JSON.stringify({ message: 'An Error Occurred. Try Again Later.' }), {
 			status: 503,
 			headers: { 'Content-Type': 'application/json' }
@@ -23,11 +26,18 @@ async function proxyToBackend(backendUrl: URL, event: RequestEvent) {
 	}
 }
 
-export const handle: Handle = async ({ event, resolve }) => {
+const noindex: Handle = async ({ event, resolve }) => {
+	if (event.route.id?.startsWith('/(protected)')) {
+		event.setHeaders({ 'X-Robots-Tag': 'noindex, nofollow' });
+	}
+	return resolve(event);
+};
+
+export const appHandle: Handle = async ({ event, resolve }) => {
 	event.locals.backendFetch = createBackendFetch(event);
 	// rewrite /api requests to backend. Avoids cors issues entirely
 	if (event.url.pathname.startsWith('/api')) {
-		return proxyToBackend(new URL(event.url.pathname, env.BACKEND_URL), event);
+		return proxyToBackend(new URL(event.url.pathname, BACKEND_URL), event);
 	}
 
 	const route = event.route.id;
@@ -60,3 +70,5 @@ export const handle: Handle = async ({ event, resolve }) => {
 		error(403, 'You are not authorized to view this content.');
 	}
 };
+
+export const handle = sequence(noindex, appHandle);

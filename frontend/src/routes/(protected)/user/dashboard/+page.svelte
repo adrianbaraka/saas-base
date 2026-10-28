@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Appbar from '$lib/components/Layout/Appbar.svelte';
+	import Appbar from '#lib/components/Layout/Appbar.svelte';
 
 	let { data } = $props();
 </script>

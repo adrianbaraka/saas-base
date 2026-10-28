@@ -7,10 +7,10 @@
 	import MailOutlineIcon from '@iconify-svelte/material-symbols/mail-outline';
 	import PersonOutlineIcon from '@iconify-svelte/material-symbols/person-outline';
 	import BusinessOutlineIcon from '@iconify-svelte/material-symbols/business-center-outline';
-	import { showToast } from '$lib/components/Toast/toastStore.svelte';
+	import { showToast } from '#lib/components/Toast/toastStore.svelte.js';
 
 	let passwordVisible = $state(false);
-	let confirmPasswordVisible = $state(false)
+	let confirmPasswordVisible = $state(false);
 	let loading = $state(false);
 	let errorVisible = $state(false);
 
@@ -127,7 +127,7 @@
 				placeholder="Confirm password"
 				bind:value={confirmPassword}
 			/>
-						<button
+			<button
 				type="button"
 				class="btn btn-circle btn-ghost btn-sm"
 				onclick={() => (confirmPasswordVisible = !confirmPasswordVisible)}
@@ -146,13 +146,7 @@
 		<!-- tenant/company name -->
 		<label class="validator input" class:input-error={errorVisible}>
 			<BusinessOutlineIcon height="20" />
-			<input
-				type="text"
-				required
-				placeholder="Company name"
-				minlength="3"
-				bind:value={orgName}
-			/>
+			<input type="text" required placeholder="Company name" minlength="3" bind:value={orgName} />
 		</label>
 
 		<!-- submit -->

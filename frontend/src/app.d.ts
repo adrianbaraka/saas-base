@@ -1,4 +1,4 @@
-import type { BetterAuthSession } from '$lib';
+import type { BetterAuthSession } from '#lib';
 
 declare global {
 	namespace App {

@@ -1,4 +1,4 @@
-import { env } from '$env/dynamic/private';
+import { BACKEND_URL } from '$app/env/private';
 import type { RequestEvent } from '@sveltejs/kit';
 
 /**
@@ -16,7 +16,7 @@ export function createBackendFetch(event: RequestEvent) {
 		headers.set('cookie', cookie);
 		headers.set('x-forwarded-for', clientAddress);
 
-		return fetchFn(`${env.BACKEND_URL}${path}`, { ...init, headers });
+		return fetchFn(`${BACKEND_URL}${path}`, { ...init, headers });
 	};
 }
 export type BackendFetchType = ReturnType<typeof createBackendFetch>;

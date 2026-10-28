@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { applyAction, enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import Appbar from '$lib/components/Layout/Appbar.svelte';
-	import Section from '$lib/components/Section.svelte';
-	import { showToast } from '$lib/components/Toast/toastStore.svelte.js';
-	import UserDetailsFields from '$lib/components/UserDetailsFields.svelte';
-	import { welcomeEmailSend } from '$lib/utils.js';
+	import Appbar from '#lib/components/Layout/Appbar.svelte';
+	import Section from '#lib/components/Section.svelte';
+	import { showToast } from '#lib/components/Toast/toastStore.svelte.js';
+	import UserDetailsFields from '#lib/components/UserDetailsFields.svelte';
+	import { welcomeEmailSend } from '#lib/utils.js';
 
 	let { data, form } = $props();
 
@@ -31,7 +31,7 @@
 							if (sendEmail) {
 								await welcomeEmailSend({ email: email, me: data.me! });
 							}
-							goto(result.location);
+							await goto(result.location);
 						} else if (result.type === 'failure') {
 							const message =
 								typeof result.data?.error === 'string'

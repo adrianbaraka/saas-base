@@ -1,6 +1,6 @@
 import { error, fail, isRedirect, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import type { BetterAuthUser, Role } from '$lib';
+import type { BetterAuthUser, Role } from '#lib';
 
 type userRes = {
 	user: BetterAuthUser;

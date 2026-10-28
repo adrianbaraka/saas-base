@@ -1,6 +1,6 @@
 services:
   db:
-    container_name: backend-db
+    container_name: saas-db
     image: postgres:18.4
     restart: unless-stopped
     environment:

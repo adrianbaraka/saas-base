@@ -1,21 +1,20 @@
 <script lang="ts">
-	import Appbar from '$lib/components/Layout/Appbar.svelte';
-	import BanUnban from '$lib/components/Profile/actions/BanUnban.svelte';
-	import EditInfo from '$lib/components/Profile/actions/EditInfo.svelte';
-	import RevokeAllSessions from '$lib/components/Profile/actions/RevokeAllSessions.svelte';
-	import SendWelcomeEmail from '$lib/components/Profile/actions/SendWelcomeEmail.svelte';
-	import RoleChange from '$lib/components/Profile/RoleChange.svelte';
-	import UserInfo from '$lib/components/Profile/UserInfo.svelte';
-	import UserSessions from '$lib/components/Profile/UserSessions.svelte';
-	import Section from '$lib/components/Section.svelte';
+	import Appbar from '#lib/components/Layout/Appbar.svelte';
+	import BanUnban from '#lib/components/Profile/actions/BanUnban.svelte';
+	import EditInfo from '#lib/components/Profile/actions/EditInfo.svelte';
+	import RevokeAllSessions from '#lib/components/Profile/actions/RevokeAllSessions.svelte';
+	import SendWelcomeEmail from '#lib/components/Profile/actions/SendWelcomeEmail.svelte';
+	import RoleChange from '#lib/components/Profile/RoleChange.svelte';
+	import UserInfo from '#lib/components/Profile/UserInfo.svelte';
+	import UserSessions from '#lib/components/Profile/UserSessions.svelte';
+	import Section from '#lib/components/Section.svelte';
 	import type { PageProps } from './$types';
-	//import UserProfilePage from '$lib/components/Profile/upp.bak';
+	//import UserProfilePage from '#lib/components/Profile/upp.bak';
 
 	let { data }: PageProps = $props();
 	let sessions = $derived(data.sessionData?.sessions);
 
 	let isProfile = $derived(data.me?.user.id === data.user.id);
-	
 </script>
 
 {#if data.me}

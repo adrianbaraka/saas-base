@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
-	import type { AuthError, BetterAuthUser, UserSessionFull } from '$lib';
-	import { authClient } from '$lib/auth-client';
+	import { refreshAll } from '$app/navigation';
+	import type { AuthError, BetterAuthUser, UserSessionFull } from '#lib';
+	import { authClient } from '#lib/auth-client.js';
 	import Section from '../Section.svelte';
 	import DeleteIcon from '@iconify-svelte/material-symbols/delete';
 	import { showToast } from '../Toast/toastStore.svelte';
@@ -56,7 +56,7 @@
 			console.error(e.message);
 		} else {
 			showToast('Successfully revoked the session.', 'success');
-			await invalidateAll();
+			await refreshAll();
 		}
 	}
 </script>

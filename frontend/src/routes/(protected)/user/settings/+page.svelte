@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SettingsPage from '$lib/components/Profile/SettingsPage.svelte';
+	import SettingsPage from '#lib/components/Profile/SettingsPage.svelte';
 	let { data } = $props();
 </script>
 

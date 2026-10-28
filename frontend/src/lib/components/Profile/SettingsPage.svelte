@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { BetterAuthUser, UserSessionFull } from '$lib';
+	import type { BetterAuthUser, UserSessionFull } from '#lib';
 	import Appbar from '../Layout/Appbar.svelte';
 	import Section from '../Section.svelte';
 	import ChangePassword from './actions/ChangePassword.svelte';

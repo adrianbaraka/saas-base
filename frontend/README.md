@@ -78,7 +78,7 @@ A base frontend for the elysia backend built with [Sveltekit](https://svelte.dev
 
   // +page.svelte
   <script lang="ts">
-      import Appbar from '$lib/components/Appbar.svelte';
+      import Appbar from '#lib/components/Appbar.svelte';
       let { data } = $props();
   </script>
 

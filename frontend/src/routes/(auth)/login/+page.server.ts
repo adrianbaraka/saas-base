@@ -1,5 +1,5 @@
-import { rolePrefix } from '$lib/roles';
-import { fetchSession } from '$lib/server/session';
+import { rolePrefix } from '#lib/roles.js';
+import { fetchSession } from '#lib/server/session.js';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 

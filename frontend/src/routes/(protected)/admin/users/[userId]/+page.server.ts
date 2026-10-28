@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import type { BetterAuthUser, Role, UserSessionResponseFull } from '$lib';
+import type { BetterAuthUser, Role, UserSessionResponseFull } from '#lib';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const payload = {
