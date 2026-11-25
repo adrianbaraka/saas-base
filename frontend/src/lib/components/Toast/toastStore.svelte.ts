@@ -1,10 +1,10 @@
-import type { ToastType } from '$lib';
+import type { ToastType } from '#lib/interfaces.ts';
 
 type ToastItem = {
 	id: number;
 	message: string;
 	type: ToastType;
-	duration: number;
+	duration?: number;
 };
 
 let toasts = $state<ToastItem[]>([]);
@@ -12,8 +12,10 @@ let nextId = 0;
 
 export function showToast(message: string, type: ToastType, duration?: number) {
 	const id = nextId++;
-	const resolvedDuration = duration ?? (type === 'error' ? 5000 : 2500);
-	toasts.push({ id, message, type, duration: resolvedDuration });
+	const needsFallback = (type === 'error' || type === 'warning') && !message?.trim();
+	const resolvedMessage = needsFallback ? 'An error occurred' : message;
+	const resolvedDuration = duration ?? (type === 'success' ? 5000 : undefined);
+	toasts.push({ id, message: resolvedMessage, type, duration: resolvedDuration });
 }
 
 export function dismissToast(id: number) {

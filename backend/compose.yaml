@@ -1,6 +1,6 @@
 services:
   db:
-    container_name: backend-db
+    container_name: saas-db
     image: postgres:18.4
     restart: unless-stopped
     environment:
@@ -13,7 +13,7 @@ services:
     ports:
       - "${DB_PORT}:5432"
     volumes:
-      - db_data:/var/lib/postgresql
+      - db_data1:/var/lib/postgresql
 
 volumes:
-  db_data:
+  db_data1:

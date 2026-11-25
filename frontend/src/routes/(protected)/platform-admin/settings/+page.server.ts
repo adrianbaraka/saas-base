@@ -1,8 +1,8 @@
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import type { UserSessionFull } from '$lib';
+import type { UserSessionFull } from '#lib/interfaces.ts';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, url }) => {
 	let res: Response;
 	try {
 		res = await locals.backendFetch('/api/auth/list-sessions');
@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			error(401, 'Unauthenticated');
 			break;
 		case 403:
-			error(403, 'Unauthorized');
+			redirect(302, `/login?reauth=1&redirectTo=${encodeURIComponent(url.pathname)}`);
 	}
 
 	if (!res.ok) {

@@ -1,36 +1,43 @@
-const routeRoles = new Map<string, string>();
-routeRoles.set('/(protected)/admin', 'admin');
+import type { OrganizationRole } from './interfaces';
 
-// prefix for routes based on role
-const rolePrefixList: Record<string, string> = {
-	platformAdmin: '/platform-admin',
-	admin: '/admin',
-	default: '/user'
-};
+// Resolve role prefix
+export function getRolePrefix(role: OrganizationRole): string {
+	const mapping: Record<OrganizationRole, string> = {
+		owner: 'admin',
+		admin: 'admin',
+		member: 'member'
+	};
 
-// search routeRoles for the required role. exact match first, then longest matching prefix
-// so nested routes under a protected group inherit the parent's role requirement.
-export function getRequiredRole(route: string | null): string | undefined {
-	if (!route) return undefined;
-
-	if (routeRoles.has(route)) {
-		return routeRoles.get(route);
-	}
-
-	let bestMatch: string | undefined;
-	for (const key of routeRoles.keys()) {
-		if (route.startsWith(key + '/') || route === key) {
-			if (!bestMatch || key.length > bestMatch.length) {
-				bestMatch = key;
-			}
-		}
-	}
-
-	return bestMatch ? routeRoles.get(bestMatch) : undefined;
+	return mapping[role];
 }
 
-export function rolePrefix(role: string | null | undefined) {
-	if (!role) return rolePrefixList.default;
+// Resolve organization dashboard destination
+export function getOrganizationDestination(orgId: string, role: OrganizationRole): string {
+	return `/${orgId}/${getRolePrefix(role)}/dashboard`;
+}
 
-	return rolePrefixList[role] ?? rolePrefixList.default;
+export type UserAccess = {
+	isPlatformAdmin: boolean;
+	organizations: Record<string, OrganizationRole>;
+};
+
+const requiredRoles: Record<string, OrganizationRole[]> = {
+	admin: ['owner', 'admin'],
+	member: ['member']
+};
+
+const authedRoutes = ['/continue'];
+
+export function canAccessRoute(pathname: string, user: UserAccess): boolean {
+	const [orgId, prefix] = pathname.split('/').filter(Boolean);
+
+	// Routes accessible to everyone (exact matching)
+	if (authedRoutes.includes(pathname)) return true;
+
+	if (orgId === 'platform-admin') return user.isPlatformAdmin;
+	if (!orgId || !prefix) return false;
+	if (!Object.hasOwn(user.organizations, orgId)) return false;
+	if (!Object.hasOwn(requiredRoles, prefix)) return false;
+
+	return requiredRoles[prefix].includes(user.organizations[orgId]);
 }

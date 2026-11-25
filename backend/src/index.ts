@@ -1,60 +1,72 @@
-import { Elysia, t } from "elysia";
-import { betterAuthRoute, Docs } from "@lib/auth";
-import { template } from "@routes/v1/template/template";
-import { defaultAdmin, runMigrations } from "@lib/utils";
-import { usersRoutes } from "@routes/v1/users/users";
-import { tenantRoutes } from "@routes/v1/tenants/tenants";
-import { betterAuthAdminRoutes } from "@routes/v1/admin/admin";
-import { ApiError } from "@lib/errors";
+import { Elysia } from "elysia";
+import { fromTypes, openapi } from "@elysia/openapi";
+import path from "node:path";
+import { csrf, runMigrations } from "@lib/utils";
+import { auth, OpenAPI, trustedOrigins } from "@lib/auth";
+import { toErrorReply } from "@lib/errors";
+import { defaultAdmin } from "@lib/services/users.services";
+import { orgMemberRoutes } from "@routes/admin/admin";
+import { MemberRoutes } from "@routes/member/member";
+import { platformAdminRoutes } from "@routes/platformAdmin/platform"
 
-const healthCheck = new Elysia().get("/health", () => ({ success: true }), {
-	response: { 200: t.Object({ success: t.Boolean() }) },
-	detail: { security: [] },
-});
-
-async function main() {
-	// if prod dont mount docs and template
-	const isProduction = process.env.NODE_ENV === "production";
-	try {
+const isProduction = process.env.NODE_ENV === "production";
+const healthCheck = new Elysia().get(
+	"/health",
+	{
+		detail: { security: [] },
+	},
+	() => ({ success: true }),
+);
+// try and run migrations on startup
+try {
+	if (process.env.SKIP_MIGRATIONS) {
+		console.log("Skipping migrations.");
+	} else {
 		await runMigrations();
 		console.log("Migrations applied successfully");
-		await defaultAdmin();
-	} catch (err) {
-		console.error(err);
-		process.exit(1);
 	}
-
-	const app = new Elysia()
-		//handle thrown errors
-		.onError(({ error, status }) => {
-			if (error instanceof ApiError) {
-				return status(error.status, {
-					message: error.message,
-				});
-			}
-
-			console.error(error);
-
-			return status(500, {
-				message: "Internal server error.",
-			});
-		})
-		.use(healthCheck)
-		.use(!isProduction ? Docs : (app) => app)
-		.use(betterAuthRoute)
-		.use(betterAuthAdminRoutes)
-		.group("/api/v1", (v1) => {
-			if (!isProduction) {
-				v1.use(template);
-			}
-			v1.use(usersRoutes);
-			v1.use(tenantRoutes);
-			return v1;
-		})
-		.listen(8000);
-	console.log(
-		`Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,
-	);
+	await defaultAdmin();
+} catch (err) {
+	console.error(err);
+	process.exit(1);
 }
 
-void main();
+export const app = new Elysia()
+	.onError(({ error, status }) => {
+		const reply = toErrorReply(error);
+		return status(reply.status, reply.body);
+	})
+	.use(
+		csrf({
+			trustedOrigins: trustedOrigins,
+			skipPaths: [], // signed callbacks, not browser traffic
+		}),
+	)
+	.use(
+		openapi({
+			references: fromTypes("src/index.ts", {
+				projectRoot: path.join(import.meta.dir, ".."),
+				debug: true,
+			}),
+			enabled: !isProduction,
+			documentation: {
+				info: {
+					title: "Saas base",
+					version: "0.0.1",
+				},
+				components: await OpenAPI.components,
+				paths: await OpenAPI.getPaths(),
+			},
+		}),
+	)
+	.use(healthCheck)
+	.mount(auth.handler)
+	.group("/api/v1", (v1) =>
+		v1
+			.use(platformAdminRoutes)
+			.use(orgMemberRoutes)
+			.use(MemberRoutes),
+	)
+	.listen(8000);
+
+console.log(`Elysia is running at ${app.server?.hostname}:${app.server?.port}`);

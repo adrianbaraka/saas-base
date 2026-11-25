@@ -1,10 +1,10 @@
-import type { BetterAuthSession } from '$lib';
-
+import type { BetterAuthSession, OrganizationsResponse } from '#lib/interfaces.ts';
 declare global {
 	namespace App {
 		interface Locals {
 			session: BetterAuthSession | null;
 			backendFetch: (path: string, init?: RequestInit) => Promise<Response>;
+			orgs: OrganizationsResponse | null;
 		}
 	}
 }

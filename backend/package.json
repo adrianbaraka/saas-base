@@ -1,37 +1,41 @@
 {
-	"name": "backend",
+	"name": "saas",
 	"version": "1.0.50",
 	"scripts": {
-		"test": "bun test",
+		"test": "echo \"Error: no test specified\" && exit 1",
 		"dev": "bun run --watch src/index.ts",
-		"betterAuth:generate": "bun x auth@latest generate --output src/lib/db/schema",
+		"betterAuth:generate": "bun x auth@latest generate",
 		"db:generate": "bunx drizzle-kit generate",
+		"db:preview": "rm -rf .drizzle-preview && cp -r drizzle .drizzle-preview && bunx drizzle-kit generate --config=drizzle.preview.config.ts",
 		"db:migrate": "bunx drizzle-kit migrate",
+		"db:push": "bunx drizzle-kit push --verbose",
 		"db:ui": "bun x drizzle-kit studio",
-		"seed-demo": "bun run scripts/demoSeed.ts",
-		"lint": "bunx eslint ."
+		"check": "bunx eslint . && bunx tsc --noEmit",
+		"docker:build": "docker build -t app_binary_name-backend:latest ."
 	},
 	"dependencies": {
-		"@elysia/openapi": "^1.4.15",
-		"@faker-js/faker": "^10.5.0",
-		"better-auth": "^1.6.20",
-		"dotenv": "^17.4.2",
-		"drizzle-orm": "^0.45.2",
-		"drizzle-typebox": "^0.3.3",
-		"elysia": "^1.4.29",
-		"pg": "^8.22.0",
-		"resend": "^6.17.2"
+		"@better-auth/drizzle-adapter": "^1.7.25",
+		"@elysia/openapi": "^2.0.0-rc.1",
+		"better-auth": "^1.7.25",
+		"dotenv": "^18.0.10",
+		"drizzle-orm": "^1.0.0-rc.5",
+		"elysia": "^2.0.0-rc.3",
+		"nanoid": "^6.0.2",
+		"pg": "^8.23.1",
+		"resend": "^6.38.1"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
-		"@types/pg": "^8.20.0",
+		"@types/bun": "^1.4.4",
+		"@types/pg": "^8.23.1",
 		"bun-types": "latest",
-		"drizzle-kit": "^0.31.10",
-		"eslint": "^10.6.0",
-		"globals": "^17.7.0",
+		"drizzle-kit": "^1.0.0-rc.5",
+		"eslint": "^10.15.0",
+		"globals": "^17.14.0",
 		"jiti": "^2.7.0",
-		"tsx": "^4.22.4",
-		"typescript-eslint": "^8.62.0"
+		"tsx": "^4.23.15",
+		"typescript-eslint": "^8.73.0"
 	},
-	"module": "src/index.js"
+	"module": "src/index.js",
+	"type": "module"
 }

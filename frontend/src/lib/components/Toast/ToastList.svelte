@@ -4,7 +4,7 @@
 	import { getToasts } from './toastStore.svelte';
 </script>
 
-<div class="toast toast-center toast-top lg:toast-end z-50 gap-2">
+<div class="toast toast-center toast-top z-50 gap-2 lg:toast-end">
 	{#each getToasts() as toast (toast.id)}
 		<div animate:flip={{ duration: 300 }}>
 			<Toast {...toast} />

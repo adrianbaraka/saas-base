@@ -1,41 +1,89 @@
 import { User } from "better-auth";
-//import { Resend } from "resend";
+import { resetPasswordTemplate } from "./templates/reset-password";
+import { verificationTemplate } from "./templates/verification";
+import { WelcomeContext, welcomeTemplate } from "./templates/welcome";
+import { existingSignUpTemplate } from "./templates/existing";
+import { sendEmail } from "./utils";
+import { OrgRequest } from "@lib/db/schema/orgs";
+import { orgRequestRejectedTemplate } from "./templates/org-request-rejected";
+import { orgAddedTemplate } from "./templates/org-added";
+import { env } from "@lib/env";
+import { INVITE_TTL_MS } from "@lib/utils";
 
-//const resend = new Resend(process.env.RESEND_API_KEY);
-
-// async function Email() {
-//   const { data, error } = await resend.emails.send({
-//     from: 'Acme <onboarding@resend.dev>',
-//     to: ['delivered@resend.dev'],
-//     subject: 'Hello World',
-//     html: '<strong>It works!</strong>',
-//   });
-
-//   if (error) {
-//     return console.error({ error });
-//   }
-
-//   console.log({ data });
-// };
-
-export function resetPasswordEmail(user: User, url: string) {
-	// TODO use resend to send email
-	console.log(`Password reset email for ${user.email}. url: ${url}`);
+export async function resetPasswordEmail(user: User, url: string) {
+	const { subject, html } = resetPasswordTemplate({
+		name: user.name,
+		resetUrl: url,
+	});
+	return sendEmail({ to: user.email, subject, html });
 }
 
-export function verificationEmail(user: User, url: string) {
-	// TODO use resend to send email
-	console.log(`Verification email for ${user.email}. url: ${url}`);
+export async function verificationEmail(user: User, url: string) {
+	const { subject, html } = verificationTemplate({
+		name: user.name,
+		verifyUrl: url,
+	});
+	return sendEmail({ to: user.email, subject, html });
 }
 
-export function welcomeEmail(user: User, url: string) {
-	// TODO use resend to send email
-	console.log(`Welcome email for ${user.email}. url: ${url}`);
+export async function welcomeEmail(
+	user: { name: string; email: string },
+	url: string,
+	context: WelcomeContext,
+) {
+	const { subject, html } = welcomeTemplate({
+		name: user.name,
+		setPasswordUrl: url,
+		expiresInDays: Math.round(INVITE_TTL_MS / 86_400_000),
+		context,
+	});
+	return sendEmail({ to: user.email, subject, html });
 }
 
-export function existingSignUpEmail(user: User) {
-	// TODO use resend to send email
-	console.log(
-		`${user.email} Someone tried to create an account using your email address. If this was you, try signing in instead. If not, you can safely ignore this email.`,
-	);
+export async function existingSignUpEmail(user: User) {
+	const { subject, html } = existingSignUpTemplate({
+		name: user.name,
+		signInUrl: `${process.env.APP_URL}/sign-in`,
+	});
+	return sendEmail({ to: user.email, subject, html });
+}
+
+// the narrow type means the internal rejection reason can't be passed in by accident
+export async function orgRequestRejectedEmail(
+	request: Pick<OrgRequest, "email" | "requesterName" | "organizationName">,
+) {
+	const { subject, html } = orgRequestRejectedTemplate({
+		requesterName: request.requesterName,
+		organizationName: request.organizationName,
+	});
+	return sendEmail({ to: request.email, subject, html });
+}
+
+export async function orgAddedEmail(params: {
+	email: string;
+	organizationId: string;
+	organizationName: string;
+	adderName: string;
+}) {
+	const { subject, html } = orgAddedTemplate({
+		memberEmail: params.email,
+		organizationName: params.organizationName,
+		adderName: params.adderName,
+		orgLink: `${env.BETTER_AUTH_URL}/login`,
+	});
+	return sendEmail({ to: params.email, subject, html });
+}
+
+export async function sendOrgMemberAdded(
+	user: { email: string },
+	organizationId: string,
+	organizationName: string,
+	adderName: string,
+) {
+	await orgAddedEmail({
+		email: user.email,
+		organizationId,
+		organizationName,
+		adderName,
+	});
 }

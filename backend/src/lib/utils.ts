@@ -1,18 +1,11 @@
+import { env } from "./env";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import path from "node:path";
 import { db } from "./db";
-import { user } from "./db/schema/auth-schema";
-import { eq } from "drizzle-orm";
-import { nanoid } from "nanoid";
-import { env } from "./env";
-import { handleSendWelcomeEmail } from "@routes/v1/users/users.handlers";
+import Elysia from "elysia";
 
-/**
- * Asserts that a value is neither null nor undefined.
- * @param val - The value to check.
- * @param message - Optional custom error message.
- * @throws {Error} If val is null or undefined.
- */
+export const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
 export function assertExists<T>(
 	val: T,
 	message: string = "Value is null or undefined",
@@ -25,50 +18,31 @@ export function assertExists<T>(
 export async function runMigrations() {
 	const url = env.DATABASE_URL;
 	assertExists(url, "DATABASE_URL env var is not set");
-
 	const migrationsFolder =
+		// for prod migrations folder is specified
 		process.env.MIGRATIONS_FOLDER ??
 		path.join(import.meta.dir, "../../drizzle");
 
 	await migrate(db, { migrationsFolder });
 }
-// create a default admin account if not exist
-export async function defaultAdmin() {
-	// check if an admin exists
-	const res = await db.$count(user, eq(user.role, "platformAdmin"));
-	if (res > 0) {
-		console.log("A platform admin account already exists.");
-		return;
-	}
 
-	// manually create the first admin user
-	const [created] = await db
-		.insert(user)
-		.values({
-			id: nanoid(),
-			name: env.DEFAULT_ADMIN_NAME,
-			email: env.DEFAULT_ADMIN_EMAIL,
-			emailVerified: false,
-			role: "platformAdmin",
-		})
-		.returning();
+const MUTATING = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
-	if (!created) {
-		console.error(
-			"An error occurred creating the default platform admin user.",
-		);
-		process.exit(1);
-	}
-	const redirectTo = `${env.BETTER_AUTH_URL}/welcome`;
-	try {
-		await handleSendWelcomeEmail(created, created.email, redirectTo);
-		console.log("Default platform admin account created successfully");
-	} catch (error) {
-		console.error(error);
-		process.exit(1);
-	}
-}
+export const csrf = (opts: {
+	trustedOrigins: string[];
+	skipPaths?: string[];
+}) =>
+	new Elysia({ name: "csrf" }).onRequest(({ request, set }) => {
+		//console.log(request);
 
-export function escapeLikePattern(value: string): string {
-	return value.replace(/[\\%_]/g, "\\$&");
-}
+		if (!MUTATING.has(request.method)) return;
+
+		const { pathname } = new URL(request.url);
+		if (opts.skipPaths?.some((p) => pathname.startsWith(p))) return;
+
+		const origin = request.headers.get("origin");
+		if (origin && opts.trustedOrigins.includes(origin)) return;
+
+		set.status = 403;
+		return { message: "Forbidden: untrusted origin" };
+	});
