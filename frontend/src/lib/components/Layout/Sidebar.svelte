@@ -3,10 +3,10 @@
 	import MenuIcon from '@iconify-svelte/material-symbols/menu';
 	import ChevronDownIcon from '@iconify-svelte/material-symbols/keyboard-arrow-down';
 	import { page } from '$app/state';
-	import type { IconComponent, SideLink } from '#lib';
 	import { isSidebarOpen, closeSidebar, toggleSidebar } from './sidebarStore.svelte';
 	import type { Snippet } from 'svelte';
 	import { version } from '$app/env';
+	import type { IconComponent, SideLink } from '#lib/interfaces.ts';
 
 	interface Props {
 		links: SideLink[];
@@ -15,7 +15,7 @@
 		appName?: string;
 	}
 
-	let { links, children, logo: Logo = SchoolIcon, appName = 'UnifyEdu' }: Props = $props();
+	let { links, children, appName, logo: Logo = SchoolIcon }: Props = $props();
 
 	// desktop: icon-only collapse (independent of mobile drawer)
 	let collapsed = $state(false);
@@ -51,7 +51,9 @@
 				<div class={`${collapsed ? 'block lg:hidden' : ''}`}>
 					<Logo height="30" />
 				</div>
-				<div class={`${collapsed ? 'block lg:hidden' : ''} text-2xl`}>{appName}</div>
+				<div class={`${collapsed ? 'block lg:hidden' : ''} w-25 truncate text-2xl`} title={appName}>
+					{appName}
+				</div>
 				<button
 					class="cursor-pointer hover:scale-110"
 					onclick={() => {

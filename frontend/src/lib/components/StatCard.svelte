@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { IconComponent } from '#lib';
+	import type { IconComponent } from '#lib/interfaces.ts';
 	import VisibilityIcon from '@iconify-svelte/material-symbols/visibility';
 	import VisibilityOffIcon from '@iconify-svelte/material-symbols/visibility-off';
 

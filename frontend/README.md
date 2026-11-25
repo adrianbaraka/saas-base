@@ -1,99 +1,56 @@
-## Overview
+# sv
 
-A base frontend for the elysia backend built with [Sveltekit](https://svelte.dev/docs/kit/introduction), [DaisyUI](https://daisyui.com/components/) and [Iconify](https://icon-sets.iconify.design/material-symbols/).
+Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
 
-## Folder structure
+## Creating a project
 
-```bash
-.
-├── bun.lock
-├── Dockerfile # build an image
-├── healthCheck.ts # healthcheck script
-├── package.json # dependancies and scripts
-├── README.md
-├── src
-│   ├── app.d.ts
-│   ├── app.html
-│   ├── hooks.server.ts # runs before each request auth is implemented here
-│   ├── lib
-│   │   ├── assets
-│   │   │   └── favicon.svg
-│   │   ├── auth-client.ts # better auth client config
-│   │   ├── components/ # shared ui components
-│   │   │   ├── Appbar.svelte # every page should have this(has the appbar and layout)
-│   │   │   ├── MainLayout.svelte # implemented in a modules layout
-│   │   ├── index.ts
-│   │   ├── roles.ts # simple role check for modules ui. is enforced by the backend
-│   │   ├── server # server only functions
-│   │   │   ├── backend-fetch.ts # fetches from backend(injects cookie and headers auto)
-│   │   │   └── session.ts # fetch session
-│   └── routes
-│       ├── (auth)
-│       │   └── login # login page
-│       │       ├── +page.server.ts
-│       │       └── +page.svelte
-│       ├── +error.svelte
-│       ├── health # container healthcheck endpoint
-│       ├── layout.css
-│       ├── +layout.svelte # main app layout
-│       ├── +page.svelte
-│       └── (protected) # everything under here requires an authenticated user
-│           ├── admin # admin module
-│           │   ├── dashboard
-│           │   │   ├── +page.server.ts
-│           │   │   └── +page.svelte
-│           │   ├── +layout.svelte # module layout. has the admin layout the nav links.
-│           └── user
-│               └── dashboard
-│                   ├── +page.server.ts
-│                   └── +page.svelte
-├── static
-│   └── robots.txt
-├── tsconfig.json
-└── vite.config.ts
+If you're seeing this, you've probably already done this step. Congrats!
 
+```sh
+# create a new project
+npx sv create my-app
 ```
 
-- For each module under `routes/(protected)` a `+layout.svelte` file holds the links in the side/nav bar implemented by `mainlayout`, example `routes/(protected)/admin/+layout.ts`.
-- For each individual page import `appBar.svelte` that provides the page bar and scrollble region.
+To recreate this project with the same configuration:
 
-## Security
+```sh
+# recreate this project
+bun x sv@1.6.0 create --template minimal --types ts --add prettier eslint tailwindcss="plugins:none" --install bun frontend
+```
 
-- Security is enforced in the `hooks.server.ts` file. Basically all routes under `src/routes/(protected)` require an authenticated user.
-- For role specific checks this map is used. In this example to access anything under `/(protected)/admin` the user must have the role `admin`.
+## Adding features
 
-  ```TS
-  const routeRoles = new Map<string, string>();
-  routeRoles.set('/(protected)/admin', 'admin');
-  ```
+Add features to your project with `sv add`:
 
-- To access the users info in a page the `+page.server.ts` returns the object and can be accessed in the `+page.svelte`
+```sh
+npx sv add
+```
 
-  ```TS
-  // +page.server.ts
-  import type { PageServerLoad } from './$types';
-  export const load: PageServerLoad = async ({ locals }) => {
-      return { session: locals.session };
-  };
+For example, to add Tailwind CSS:
 
-  // +page.svelte
-  <script lang="ts">
-      import Appbar from '#lib/components/Appbar.svelte';
-      let { data } = $props();
-  </script>
+```sh
+npx sv add tailwindcss
+```
 
-  <Appbar title="Default User page" description="" user={data.session?.user}>
-      <div>User page</div>
-  </Appbar>
-  ```
+## Developing
 
-### Adding a new module
+Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
-1. Create a new folder `src/routes/protected/<module>`
-2. Add a `+layout.svelte` file with nav links.
-3. If requires a role register it in `src/lib/roles.ts`
-4. Wrap each page in `Appbar`
+```sh
+npm run dev
 
-### Notes
+# or start the server and open the app in a new browser tab
+npm run dev -- --open
+```
 
-- To avoid cors issues any client side fetch to the backend(minimal) is prefixed with `/api` which is then rewritten by `hooks.server.ts` to the backend so from browsers perspective its querying the same origin.
+## Building
+
+To create a production version of your app:
+
+```sh
+npm run build
+```
+
+You can preview the production build with `npm run preview`.
+
+> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.

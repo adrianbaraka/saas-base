@@ -23,7 +23,7 @@
 <dialog bind:this={dialog} class="modal" onclose={handleClose}>
 	<div class="modal-box max-h-[85dvh] overflow-y-auto pt-0">
 		<div
-			class="sticky top-0 z-10 -mx-6 mb-5 flex items-center justify-between gap-2 bg-base-100 px-6 py-4"
+			class="sticky top-0 z-10 -mx-6 flex items-center justify-between gap-2 bg-base-100 px-6 py-4"
 		>
 			{#if modal?.title}
 				<h3 class="font-serif text-lg font-bold">{modal.title}</h3>

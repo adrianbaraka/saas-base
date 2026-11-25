@@ -1,5 +1,6 @@
-import type { BetterAuthSession } from '#lib';
 import { authClient } from '#lib/auth-client.js';
+import type { BetterAuthSession } from '#lib/interfaces.ts';
+import { errMsg } from '#lib/utils.ts';
 import type { BackendFetchType } from './backend-fetch';
 
 type fullSession = typeof authClient.$Infer.Session;
@@ -11,15 +12,18 @@ export async function fetchSession(
 		const res = await backendFetch('/api/auth/get-session');
 		if (!res.ok) throw new Error(`${res.status}`);
 
-		const data: fullSession = await res.json();
-		if (!data) return null;
+		const data: unknown = await res.json();
+		if (!data || typeof data !== 'object' || !('session' in data) || !('user' in data)) {
+			return null;
+		}
 
+		const fullSessionData = data as fullSession;
 		return {
-			session: data.session,
-			user: data.user
+			session: fullSessionData.session,
+			user: fullSessionData.user
 		};
 	} catch (err) {
-		console.error('Failed to fetch session:', err);
+		console.error('Failed to fetch session:', errMsg(err));
 		return null;
 	}
 }

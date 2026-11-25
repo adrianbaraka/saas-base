@@ -1,8 +1,15 @@
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
-  base-db:
-    container_name: base-db
+  app_binary_name-db:
+    container_name: app_binary_name-db
     image: postgres:18.4
     restart: unless-stopped
+    logging: *logging
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -10,55 +17,71 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       start_period: 10s
-      interval: 1m
+      interval: 5s
+      timeout: 5s
+      retries: 10
     volumes:
-      - base_db_data:/var/lib/postgresql
+      - app_binary_name_db_data:/var/lib/postgresql
     networks:
       - internal
 
-  base-backend:
-    image: "UnifyWorks/base-backend"
-    container_name: "base-backend"
+  app_binary_name-backend:
+    image: "app_binary_name-backend:latest"
+    container_name: "app_binary_name-backend"
     restart: unless-stopped
+    logging: *logging
     environment:
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
       - BETTER_AUTH_URL=${APP_URL}
       - DATABASE_URL=${DATABASE_URL}
       - DEFAULT_ADMIN_NAME=${DEFAULT_ADMIN_NAME}
       - DEFAULT_ADMIN_EMAIL=${DEFAULT_ADMIN_EMAIL}
+      - CACHE_MINUTES=${CACHE_MINUTES}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - EMAIL_FROM=${EMAIL_FROM}
+      - SEND_EMAIL=${SEND_EMAIL}
+    volumes:
+      - ${DATA_DIR:?DATA_DIR not set}:/data
     depends_on:
-      base-db:
+      app_binary_name-db:
         condition: service_healthy
+    ports:
+      - 8000:8000
     networks:
       - internal
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "wget --no-verbose --tries=1 --spider http://localhost:8000/health || exit 1",
+          "wget --no-verbose --tries=1 --spider http://127.0.0.1:8000/health || exit 1",
         ]
-      timeout: 30s
-      retries: 3
       start_period: 15s
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  base-frontend:
-    image: "UnifyWorks/base-frontend"
-    container_name: "base-frontend"
+  app_binary_name-frontend:
+    image: "app_binary_name-frontend:latest"
+    container_name: "app_binary_name-frontend"
     restart: unless-stopped
+    logging: *logging
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
       - PUBLIC_FRONTEND_URL=${APP_URL}
       - ORIGIN=${APP_URL}
       - BACKEND_URL=${BACKEND_URL}
-      #- ADDRESS_HEADER=${ADDRESS_HEADER}
-      #- XFF_DEPTH=${XFF_DEPTH}
+      # - ADDRESS_HEADER=${ADDRESS_HEADER}
+      # - XFF_DEPTH=${XFF_DEPTH}
+    depends_on:
+      app_binary_name-backend:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "bun", "healthCheck.ts"]
-      interval: 1m30s
-      timeout: 30s
-      retries: 3
       start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 5
     networks:
       - internal
 
@@ -66,4 +89,4 @@ networks:
   internal:
 
 volumes:
-  base_db_data:
+  app_binary_name_db_data:

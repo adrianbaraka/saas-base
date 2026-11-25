@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import type { BetterAuthUser } from '#lib';
 	import { authClient } from '#lib/auth-client.js';
 	import type { Snippet } from 'svelte';
-	import { rolePrefix } from '#lib/roles.js';
 	import MenuIcon from '@iconify-svelte/material-symbols/menu';
 	import { showToast } from '../Toast/toastStore.svelte';
 	import { toggleSidebar } from './sidebarStore.svelte';
 	import { resolve } from '$app/paths';
+	import type { BetterAuthUser } from '#lib/interfaces.ts';
 
 	let {
 		user,
@@ -21,10 +20,10 @@
 		children: Snippet;
 	} = $props();
 
-	// TODO settings will have tabs go to right tab here
-	const settingsURL = $derived(rolePrefix(user?.role) + '/settings');
-	const profileURL = $derived(rolePrefix(user?.role) + '/settings');
-
+// TODO settings url
+// TODO switch orgs from here basically link to /continue if has more than one org in locals.orgs
+	const settingsURL = '/settings';
+	const profileURL = '/settings';
 	async function logout() {
 		await authClient.signOut({
 			fetchOptions: {
@@ -41,7 +40,7 @@
 </script>
 
 <svelte:head>
-	<title>{title} | UnifyEdu</title>
+	<title>{title} | APP_DISPLAY_NAME</title>
 </svelte:head>
 
 <div class="flex h-full flex-col">
@@ -69,16 +68,16 @@
 					{:else}
 						<div class="avatar avatar-placeholder">
 							<div class="w-8 rounded-full bg-neutral text-neutral-content">
-								<span class="text-xs"
-									>{user?.name ? user.name.slice(0, 2).toUpperCase() : 'UI'}</span
-								>
+								<span class="text-xs">
+									{user?.name ? user.name.slice(0, 2).toUpperCase() : 'UI'}
+								</span>
 							</div>
 						</div>
 					{/if}
 				</div>
 				<ul
 					tabindex="-1"
-					class="menu dropdown-content z-1 mt-3 w-52 rounded-box bg-base-300 p-2 shadow lg:menu-sm"
+					class="dropdown-content menu z-1 mt-3 w-52 rounded-box bg-base-300 p-2 shadow lg:menu-sm"
 				>
 					<li class="max-w-full min-w-0 px-3 *:hover:cursor-text *:hover:bg-transparent">
 						<div class="flex w-full justify-center truncate font-medium" title={user?.name}>

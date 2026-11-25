@@ -1,73 +1,88 @@
 /* eslint-disable */
 import { betterAuth } from "better-auth/minimal";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { admin as adminPlugin, openAPI } from "better-auth/plugins";
-import * as authSchema from "@lib/db/schema/auth-schema";
-import { db } from "@lib/db";
-import Elysia from "elysia";
-import openapi from "@elysia/openapi";
-import { markEmailVerified } from "./db/queries";
-import {
-	existingSignUpEmail,
-	resetPasswordEmail,
-	verificationEmail,
-} from "./email";
+import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
+import { db } from "./db";
 import { env } from "./env";
-import { ac, fullRoles } from "./permissions/roles";
+import { openAPI } from "better-auth/plugins/open-api";
+import openapi from "@elysia/openapi";
+import * as authSchema from "@lib/db/schema/auth-schema";
+import { existingSignUpEmail, resetPasswordEmail } from "./email";
+import { organization } from "better-auth/plugins";
+import { markEmailVerified } from "./services/users.services";
+import { Fullroles, ac } from "./security/permissions";
+import { logQuiet } from "./audit";
 
 const AUTH_BASE_PATH = "/api/auth";
 const cacheAge = Number(env.CACHE_MINUTES) * 60;
+export const trustedOrigins = [
+	env.BETTER_AUTH_URL,
+	...(process.env.NODE_ENV !== "production" ? ["http://localhost:8000"] : []),
+];
 
-// better auth object
 export const auth = betterAuth({
+	database: drizzleAdapter(db, {
+		provider: "pg",
+		schema: authSchema,
+	}),
+	basePath: AUTH_BASE_PATH,
 	session: {
 		cookieCache: {
 			enabled: true,
 			maxAge: cacheAge, // Cache duration in seconds
 		},
+		//freshAge: 10
 	},
-	trustedOrigins: [env.BETTER_AUTH_URL, "http://localhost:8000"],
-	// block the admin routes only expose the custom routes for multitenancy
-	disabledPaths: [
-		//"/sign-up/email",
-		"/admin/set-role",
-		"/admin/get-user",
-		"/admin/create-user",
-		"/admin/update-user",
-		"/admin/list-users",
-		"/admin/list-user-sessions",
-		"/admin/unban-user",
-		"/admin/ban-user",
-		"/admin/impersonate-user",
-		"/admin/stop-impersonating",
-		"/admin/revoke-user-session",
-		"/admin/revoke-user-sessions",
-		"/admin/remove-user",
-		"/admin/set-user-password",
-	],
+	trustedOrigins: trustedOrigins,
 	advanced: {
 		ipAddress: {
 			ipAddressHeaders: ["x-forwarded-for"],
 		},
 	},
-	database: drizzleAdapter(db, {
-		provider: "pg",
-		schema: authSchema,
-	}),
 	user: {
 		additionalFields: {
+			isPlatformAdmin: {
+				type: "boolean",
+				defaultValue: false,
+				input: false,
+			},
 			welcomeEmailSentAt: {
 				type: "date",
 				required: false,
 				input: false,
 			},
-			tenantId: {
-				type: "string",
+			phone: {
+				type: "string[]",
 				required: false,
-				input: false,
+				input: true,
 			},
 		},
 	},
+	disabledPaths: [
+		"/callback",
+		"/sign-in/social",
+		"/sign-up/email",
+		"/verify-email",
+		"/send-verification-email",
+		"/change-email",
+		"/delete-user",
+		"/link-social",
+		"list-accounts",
+		"/delete-user/callback",
+		"/unlink-account",
+		"/account-info",
+		"/organization/create",
+		"/organization/delete",
+		"/organization/invite-member",
+		"/organization/update-member-role",
+		"/organization/list-members",
+		"/organization/cancel-invitation",
+		"/organization/accept-invitation",
+		"/organization/get-invitation",
+		"/organization/reject-invitation",
+		"/organization/list-invitations",
+		"/organization/remove-member",
+		"/organization/list-user-invitations",
+	],
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: true,
@@ -85,24 +100,39 @@ export const auth = betterAuth({
 			markEmailVerified(user.id, user.emailVerified);
 		},
 	},
-	emailVerification: {
-		// @ts-ignore
-		sendVerificationEmail: async ({ user, url, token }, request) => {
-			verificationEmail(user, url);
-		},
-	},
-	basePath: AUTH_BASE_PATH,
 	plugins: [
 		openAPI(),
-		adminPlugin({
+		organization({
 			ac,
-			roles: fullRoles,
+			roles: Fullroles,
+			allowUserToCreateOrganization: async (user) =>
+				user.isPlatformAdmin === true,
+			membershipLimit: 1000000, // TODO limit number?
+			disableOrganizationDeletion: true,
+			organizationHooks: {
+				afterRemoveMember: async ({ member, user, organization }) => {
+					// admin removals are logged in removeOrgMemberHandler
+					if (member.userId !== user.id) return;
+
+					await logQuiet(db, {
+						module: "members",
+						action: "member.left",
+						description: `${user.name} left the organization (${member.role})`,
+						organizationId: organization.id,
+						actorId: user.id,
+						metadata: {
+							entityType: "user",
+							ids: [user.id],
+							count: 1,
+							memberId: member.id,
+							role: member.role,
+						},
+					});
+				},
+			},
 		}),
 	],
 });
-
-export type User = typeof auth.$Infer.Session.user;
-export type Session = typeof auth.$Infer.Session;
 
 // extract openapi schema
 // https://elysiajs.com/integrations/better-auth.html
@@ -110,8 +140,18 @@ let _schema: ReturnType<typeof auth.api.generateOpenAPISchema>;
 const getSchema = async () => (_schema ??= auth.api.generateOpenAPISchema());
 
 // List of public auth endpoints that do not require an active session
-const publicEndpoints = ["/sign-in/email", "/sign-up/email", "/sign-in/social"];
-
+const publicEndpoints = [
+	"/sign-in/email",
+	"/sign-up/email",
+	"/sign-in/social",
+	"/api/auth/ok",
+	"/api/auth/error",
+];
+type OpenAPIDocs = NonNullable<
+	NonNullable<Parameters<typeof openapi>[0]>["documentation"]
+>;
+type Paths = NonNullable<OpenAPIDocs["paths"]>;
+type Components = NonNullable<OpenAPIDocs["components"]>;
 export const OpenAPI = {
 	getPaths: (prefix = AUTH_BASE_PATH) =>
 		getSchema().then(({ paths }) => {
@@ -131,31 +171,10 @@ export const OpenAPI = {
 				}
 			}
 			return reference;
-		}) as Promise<any>,
+		}) as unknown as Promise<Paths>,
 	components: getSchema().then(
 		({ components }) => components,
-	) as Promise<any>,
+	) as unknown as Promise<Components>,
 } as const;
 
-// better auth route handler
-export const betterAuthRoute = new Elysia({ name: "better-auth" }).mount(
-	auth.handler,
-);
-
-// openapi docs for better auth
-const betterAuthComponents = await OpenAPI.components;
-
-// /openapi docs
-export const Docs = new Elysia({ name: "docs" }).use(
-	openapi({
-		documentation: {
-			components: {
-				...betterAuthComponents,
-				securitySchemes: {
-					...betterAuthComponents?.securitySchemes,
-				},
-			},
-			paths: await OpenAPI.getPaths(),
-		},
-	}),
-);
+export type User = typeof auth.$Infer.Session.user;

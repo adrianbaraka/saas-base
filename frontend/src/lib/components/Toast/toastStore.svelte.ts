@@ -1,4 +1,4 @@
-import type { ToastType } from '#lib';
+import type { ToastType } from '#lib/interfaces.ts';
 
 type ToastItem = {
 	id: number;

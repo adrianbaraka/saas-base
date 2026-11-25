@@ -1,8 +1,11 @@
+import { escapeHtml } from "../utils";
+
 export function resetPasswordTemplate(params: {
 	name: string;
 	resetUrl: string;
 }) {
-	const { name, resetUrl } = params;
+	const name = escapeHtml(params.name);
+	const { resetUrl } = params;
 
 	return {
 		subject: "Reset your password",

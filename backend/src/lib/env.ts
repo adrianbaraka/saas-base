@@ -4,7 +4,10 @@ const requiredEnv = [
 	"DATABASE_URL",
 	"DEFAULT_ADMIN_EMAIL",
 	"DEFAULT_ADMIN_NAME",
-	"CACHE_MINUTES"
+	"CACHE_MINUTES",
+	"RESEND_API_KEY",
+	"EMAIL_FROM",
+	"SEND_EMAIL",
 ] as const;
 
 type RequiredEnv = Record<(typeof requiredEnv)[number], string>;

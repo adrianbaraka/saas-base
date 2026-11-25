@@ -1,10 +1,11 @@
-import { type RequestEvent, error, redirect } from '@sveltejs/kit';
-import { getRequiredRole } from '#lib/roles.js';
-import { fetchSession } from '#lib/server/session.js';
-import { BACKEND_URL } from '$app/env/private';
-import { createBackendFetch } from '#lib/server/backend-fetch.js';
+import { createBackendFetch } from '#lib/server/backend-fetch.ts';
+import { errMsg, fetchJson } from '#lib/utils.ts';
+import { error, redirect, type RequestEvent } from '@sveltejs/kit';
 import { sequence, type Handle } from '@sveltejs/kit/hooks';
-import { errMsg } from '#lib/utils.ts';
+import { BACKEND_URL } from '$app/env/private';
+import { fetchSession } from '#lib/server/session.ts';
+import type { OrganizationsResponse } from '#lib/interfaces.ts';
+import { canAccessRoute, type UserAccess } from '#lib/roles.ts';
 
 async function proxyToBackend(backendUrl: URL, event: RequestEvent) {
 	backendUrl.search = event.url.search;
@@ -27,13 +28,18 @@ async function proxyToBackend(backendUrl: URL, event: RequestEvent) {
 }
 
 const noindex: Handle = async ({ event, resolve }) => {
-	if (event.route.id?.startsWith('/(protected)')) {
+	const route = event.route.id;
+
+	if (route?.startsWith('/(protected)') || route?.startsWith('/(public)')) {
 		event.setHeaders({ 'X-Robots-Tag': 'noindex, nofollow' });
 	}
+
 	return resolve(event);
 };
 
 export const appHandle: Handle = async ({ event, resolve }) => {
+	event.locals.session = null;
+	event.locals.orgs = null;
 	event.locals.backendFetch = createBackendFetch(event);
 	// rewrite /api requests to backend. Avoids cors issues entirely
 	if (event.url.pathname.startsWith('/api')) {
@@ -48,27 +54,27 @@ export const appHandle: Handle = async ({ event, resolve }) => {
 	}
 	// everything from here should be protected
 
-	event.locals.session = await fetchSession(event.locals.backendFetch);
+	const session = await fetchSession(event.locals.backendFetch);
+	event.locals.session = session;
 
 	// protected route and user is not authenticated redirect to login
 	if (!event.locals.session) redirect(302, '/login');
 
-	// role level protections just ui the backend also enforces
-	const requiredRole = getRequiredRole(route);
+	const orgs = await fetchJson<OrganizationsResponse>(
+		event.locals.backendFetch,
+		'/api/v1/organizations/me'
+	);
+	if (!orgs) error(503, 'Could not load your organizations.');
+	event.locals.orgs = orgs;
 
-	// was null or undefined
-	if (!requiredRole) {
-		return resolve(event);
-	}
+	const access: UserAccess = {
+		isPlatformAdmin: session?.user.isPlatformAdmin ?? false,
+		organizations: Object.fromEntries(orgs.organizations.map((o) => [o.id, o.roles[0]]))
+	};
 
-	if (
-		event.locals.session?.user.role === requiredRole ||
-		event.locals.session?.user.role === 'admin'
-	) {
-		return resolve(event);
-	} else {
-		error(403, 'You are not authorized to view this content.');
-	}
+	if (!canAccessRoute(event.url.pathname, access)) error(403, 'Unauthorized');
+
+	return resolve(event);
 };
 
 export const handle = sequence(noindex, appHandle);
